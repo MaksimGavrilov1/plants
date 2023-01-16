@@ -1,0 +1,13 @@
+//users
+insert into plant_user values (11, '$2a$10$pBnsX50dIKYdMYhcNmF8hOh8pb3brFe9Nxv7ueVBd07LXc3gJBHmq', 'ROLE_ADMIN', 'qwerty1234', 'ss', 'ss', '')
+
+//container
+insert into container(description, title, plant_user_id) values ('This is a test container that will contain few setups. Also, it will contain one sensor.', 'TEST container #1', 11);
+insert into container(description, title, plant_user_id) values ('This is a test container that will contain few setups. Also, it will contain one sensor.', 'TEST container #2', 11);
+insert into container(description, title, plant_user_id) values ('This is a test container that will contain few setups. Also, it will contain one sensor.', 'TEST container #3', 11);
+insert into container(description, title, plant_user_id) values ('This is a test container that will contain few setups. Also, it will contain one sensor.', 'TEST container #4', 11);
+insert into container(description, title, plant_user_id) values ('This is a test container that will contain few setups. Also, it will contain one sensor.', 'TEST container #5', 11);
+insert into container(description, title, plant_user_id) values ('This is a test container that will contain few setups. Also, it will contain one sensor.', 'TEST container #6', 11);
+insert into container(description, title, plant_user_id) values ('This is a test container that will contain few setups. Also, it will contain one sensor.', 'TEST container #7', 11);
+insert into container(description, title, plant_user_id) values ('This is a test container that will contain few setups. Also, it will contain one sensor.', 'TEST container #8', 11);
+insert into container(description, title, plant_user_id) values ('This is a test container that will contain few setups. Also, it will contain one sensor.', 'TEST container #9', 11);
