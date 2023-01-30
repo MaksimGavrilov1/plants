@@ -32,10 +32,7 @@ public class ContainerController {
 
     @GetMapping("/container/all")
     public ResponseEntity<String> findAll(@AuthenticationPrincipal PlantUser user) throws JsonProcessingException {
-        System.out.println(user);
         List<Container> containers = containerService.findContainersByUser(user);
-        System.out.println(containers);
-        System.out.println(parser.writeValueAsString(containers));
         if (containers != null) {
             try {
                 return ResponseEntity.ok(parser.writeValueAsString(containers));
