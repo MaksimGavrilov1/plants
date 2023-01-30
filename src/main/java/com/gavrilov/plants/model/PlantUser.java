@@ -37,6 +37,19 @@ public class PlantUser implements UserDetails {
     private List<Device> devices;
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PlantUser plantUser = (PlantUser) o;
+        return id.equals(plantUser.id) && username.equals(plantUser.username);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username);
+    }
+
+    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return new ArrayList<Role>(Collections.singleton(role));
     }

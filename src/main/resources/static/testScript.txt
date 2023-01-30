@@ -11,3 +11,6 @@ insert into container(description, title, plant_user_id) values ('This is a test
 insert into container(description, title, plant_user_id) values ('This is a test container that will contain few setups. Also, it will contain one sensor.', 'TEST container #7', 11);
 insert into container(description, title, plant_user_id) values ('This is a test container that will contain few setups. Also, it will contain one sensor.', 'TEST container #8', 11);
 insert into container(description, title, plant_user_id) values ('This is a test container that will contain few setups. Also, it will contain one sensor.', 'TEST container #9', 11);
+
+
+insert into hydroponic_setup (address, container_id) values ('Left corner', 1);

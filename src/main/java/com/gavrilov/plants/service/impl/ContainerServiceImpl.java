@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class ContainerServiceImpl implements ContainerService {
@@ -30,5 +31,10 @@ public class ContainerServiceImpl implements ContainerService {
         containerDB.setTitle(container.getTitle());
         containerDB.setUser(user);
         return containerRepository.save(containerDB);
+    }
+
+    @Override
+    public Container getContainerById(Long id) throws NoSuchElementException {
+        return containerRepository.findById(id).orElseThrow();
     }
 }

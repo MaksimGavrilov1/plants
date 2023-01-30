@@ -13,12 +13,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @CrossOrigin(origins = { "http://localhost:3000", "http://localhost:4200" })
@@ -48,5 +50,21 @@ public class ContainerController {
     public ResponseEntity<String> create(@RequestBody ContainerDto container, @AuthenticationPrincipal PlantUser user) {
         containerService.createContainer(container, user);
         return ResponseEntity.status(HttpStatusCode.valueOf(200)).body("");
+    }
+
+    @GetMapping("/container/view/{id}")
+    public ResponseEntity<String> getContainer(@AuthenticationPrincipal PlantUser user, @PathVariable(name = "id") Long containerId){
+            try {
+                Container container = containerService.getContainerById(containerId);
+                if (container.getUser().equals(user)) {
+                    return ResponseEntity.ok(parser.writeValueAsString(container));
+                } else {
+                    return ResponseEntity.status(403).body("No access to this container");
+                }
+            } catch (NoSuchElementException e){
+                return ResponseEntity.status(404).body("No such container");
+            } catch (JsonProcessingException e) {
+                return ResponseEntity.status(500).body("Problem occurred");
+            }
     }
 }
