@@ -2,6 +2,7 @@ package com.gavrilov.plants.service.impl;
 
 import com.gavrilov.plants.model.Container;
 import com.gavrilov.plants.model.PlantUser;
+import com.gavrilov.plants.model.dto.ContainerDto;
 import com.gavrilov.plants.repository.ContainerRepository;
 import com.gavrilov.plants.service.ContainerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,5 +21,14 @@ public class ContainerServiceImpl implements ContainerService {
         List<Container> containers = containerRepository.findAll();
         List<Container> myCont = containerRepository.findByUser(user);
         return myCont;
+    }
+
+    @Override
+    public Container createContainer(ContainerDto container, PlantUser user) {
+        Container containerDB = new Container();
+        containerDB.setDescription(container.getDescription());
+        containerDB.setTitle(container.getTitle());
+        containerDB.setUser(user);
+        return containerRepository.save(containerDB);
     }
 }

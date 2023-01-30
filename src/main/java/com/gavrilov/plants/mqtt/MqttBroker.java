@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gavrilov.plants.model.SensorData;
 import com.gavrilov.plants.repository.SensorDataRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import org.eclipse.paho.client.mqttv3.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +49,8 @@ public class MqttBroker {
     private String messageData;
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    private final String deviceEvents = "$devices/" + deviceID + "/events";
-    private final String deviceCommands = "$devices/" + deviceID + "/commands";
+    private String deviceEvents;
+    private String deviceCommands;
 
     public enum QoS {
         AT_MOST_ONCE(0),
@@ -64,6 +65,12 @@ public class MqttBroker {
         public int getValue() {
             return value;
         }
+    }
+
+    @PostConstruct
+    private void postConstruct() {
+        deviceEvents = "$devices/" + deviceID + "/events";
+        deviceCommands = "$devices/" + deviceID + "/commands";
     }
 
     private static final String TRUSTED_ROOT = "-----BEGIN CERTIFICATE-----\n" +
@@ -307,8 +314,8 @@ public class MqttBroker {
             registry.Subscribe("$devices/#");
             device.Subscribe(deviceCommands);
 
-            registry.Publish(deviceCommands, "somecommand");
-            device.Publish(deviceEvents, "someevent");
+//            registry.Publish(deviceCommands, "somecommand");
+//            device.Publish(deviceEvents, "someevent");
 //            registry.Stop();
 //            device.Stop();
 //            return;

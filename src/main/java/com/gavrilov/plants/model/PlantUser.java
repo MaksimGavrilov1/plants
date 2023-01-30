@@ -8,10 +8,7 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "plant_user")
@@ -34,6 +31,10 @@ public class PlantUser implements UserDetails {
     @OneToMany(mappedBy="user")
     @JsonManagedReference
     private Set<Container> containers;
+
+    @OneToMany(mappedBy="owner")
+    @JsonManagedReference
+    private List<Device> devices;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
