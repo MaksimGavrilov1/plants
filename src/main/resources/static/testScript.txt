@@ -14,3 +14,7 @@ insert into container(description, title, plant_user_id) values ('This is a test
 
 
 insert into hydroponic_setup (address, container_id) values ('Left corner', 1);
+
+insert into setup_cell(level, plant_id, hydroponic_setup_id) values (3, NULL, 1);
+insert into setup_cell(level, plant_id, hydroponic_setup_id) values (3, NULL, 1);
+insert into setup_cell(level, plant_id, hydroponic_setup_id) values (3, NULL, 1);
