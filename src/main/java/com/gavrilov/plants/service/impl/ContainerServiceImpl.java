@@ -2,6 +2,7 @@ package com.gavrilov.plants.service.impl;
 
 import com.gavrilov.plants.model.Container;
 import com.gavrilov.plants.model.PlantUser;
+import com.gavrilov.plants.model.Site;
 import com.gavrilov.plants.model.dto.ContainerDto;
 import com.gavrilov.plants.repository.ContainerRepository;
 import com.gavrilov.plants.service.ContainerService;
@@ -18,9 +19,8 @@ public class ContainerServiceImpl implements ContainerService {
     private ContainerRepository containerRepository;
 
     @Override
-    public List<Container> findContainersByUser(PlantUser user) {
-        List<Container> containers = containerRepository.findAll();
-        List<Container> myCont = containerRepository.findByUser(user);
+    public List<Container> findContainersBySite(Site site) {
+        List<Container> myCont = containerRepository.findBySite(site);
         return myCont;
     }
 
@@ -29,7 +29,7 @@ public class ContainerServiceImpl implements ContainerService {
         Container containerDB = new Container();
         containerDB.setDescription(container.getDescription());
         containerDB.setTitle(container.getTitle());
-        containerDB.setUser(user);
+        containerDB.setSite(user.getSite());
         return containerRepository.save(containerDB);
     }
 

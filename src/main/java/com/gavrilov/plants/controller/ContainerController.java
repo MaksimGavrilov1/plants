@@ -34,7 +34,7 @@ public class ContainerController {
 
     @GetMapping("/container/all")
     public ResponseEntity<String> findAll(@AuthenticationPrincipal PlantUser user) throws JsonProcessingException {
-        List<Container> containers = containerService.findContainersByUser(user);
+        List<Container> containers = containerService.findContainersBySite(user.getSite());
         if (containers != null) {
             try {
                 return ResponseEntity.ok(parser.writeValueAsString(containers));
@@ -56,7 +56,7 @@ public class ContainerController {
     public ResponseEntity<String> getContainer(@AuthenticationPrincipal PlantUser user, @PathVariable(name = "id") Long containerId){
             try {
                 Container container = containerService.getContainerById(containerId);
-                if (container.getUser().equals(user)) {
+                if (container.getSite().equals(user.getSite())) {
                     return ResponseEntity.ok(parser.writeValueAsString(container));
                 } else {
                     return ResponseEntity.status(403).body("No access to this container");

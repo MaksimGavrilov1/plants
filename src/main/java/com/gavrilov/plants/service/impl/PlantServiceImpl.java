@@ -1,6 +1,8 @@
 package com.gavrilov.plants.service.impl;
 
 import com.gavrilov.plants.model.Plant;
+import com.gavrilov.plants.model.Site;
+import com.gavrilov.plants.model.dto.PlantDto;
 import com.gavrilov.plants.repository.PlantRepository;
 import com.gavrilov.plants.service.PlantService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +17,13 @@ public class PlantServiceImpl implements PlantService {
     private PlantRepository plantRepository;
 
     @Override
-    public List<Plant> findAll() {
-        return plantRepository.findAll();
+    public List<Plant> findBySite(Site site) {
+        return plantRepository.findBySite(site);
+    }
+
+    @Override
+    public Plant createPlant(PlantDto plantDto) {
+        return null;
     }
 
     @Override

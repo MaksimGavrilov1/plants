@@ -1,5 +1,6 @@
 package com.gavrilov.plants.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -28,13 +29,15 @@ public class PlantUser implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany(mappedBy="user")
-    @JsonManagedReference
-    private Set<Container> containers;
-
     @OneToMany(mappedBy="owner")
     @JsonManagedReference
     private List<Device> devices;
+
+    @ManyToOne
+    @JoinColumn(name="site_id", nullable=false)
+    @JsonBackReference
+    private Site site;
+
 
     @Override
     public boolean equals(Object o) {

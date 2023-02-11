@@ -22,9 +22,9 @@ public class Container {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name="plant_user_id", nullable=false)
+    @JoinColumn(name="site_id", nullable=false)
     @JsonBackReference
-    private PlantUser user;
+    private Site site;
 
     @OneToMany(mappedBy="container")
     @JsonManagedReference

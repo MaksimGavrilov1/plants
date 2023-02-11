@@ -1,10 +1,12 @@
 package com.gavrilov.plants.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+
 
 import java.util.List;
 import java.util.Set;
@@ -22,13 +24,20 @@ public class Plant {
     private Long id;
 
     private String title;
+    @Column(columnDefinition = "TEXT")
     private String description;
+
     @Lob
     byte[] picture;
 
     @OneToMany(mappedBy="plant")
     @JsonManagedReference
     private List<SetupCell> plantedInCells;
+
+    @ManyToOne
+    @JoinColumn(name="site_id", nullable=false)
+    @JsonBackReference
+    private Site site;
 
     public Long getId() {
         return id;
