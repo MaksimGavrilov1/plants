@@ -23,3 +23,7 @@ insert into plant (description, title) values ('Lettuce (Lactuca sativa) is an a
 insert into plant (description, title) values ('The garden strawberry (or simply strawberry; Fragaria × ananassa) is a widely grown hybrid species of the genus Fragaria, collectively known as the strawberries, which are cultivated worldwide for their fruit.', 'Strawberry');
 insert into plant (description, title) values ('Basil (/ˈbæzəl/, also US: /ˈbeɪzəl/; Ocimum basilicum /ˈɒsɪməm bəˈzɪlɪkəm/, also called great basil, is a culinary herb of the family Lamiaceae (mints). It is a tender plant, and is used in cuisines worldwide.', 'Basil');
 insert into plant (description, title) values ('Parsley, or garden parsley (Petroselinum crispum) is a species of flowering plant in the family Apiaceae that is native to the central and eastern Mediterranean region (Sardinia, Lebanon, Israel, Cyprus, Turkey, southern Italy, Greece, Albania, Portugal, Spain, Malta, Morocco, Algeria, and Tunisia).', 'Parsley');
+
+
+insert into map_condition (description, technological_map_id) values ('3 seeds per pot', 1)
+insert into map_condition (description, technological_map_id) values ('Triangle form when put the seed in form', 1)

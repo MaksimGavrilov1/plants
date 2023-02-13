@@ -18,7 +18,6 @@ public class MapCondition {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    private String name;
     private String description;
     @ManyToOne
     @JoinColumn(name="technological_map_id", nullable=false)

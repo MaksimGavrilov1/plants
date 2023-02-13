@@ -34,6 +34,10 @@ public class Plant {
     @JsonManagedReference
     private List<SetupCell> plantedInCells;
 
+    @OneToMany(mappedBy="plant")
+    @JsonManagedReference
+    private List<TechnologicalMap> maps;
+
     @ManyToOne
     @JoinColumn(name="site_id", nullable=false)
     @JsonBackReference

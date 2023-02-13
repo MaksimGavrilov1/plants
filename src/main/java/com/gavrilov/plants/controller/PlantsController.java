@@ -55,6 +55,7 @@ public class PlantsController {
         plantRender.setTitle(plant.getTitle());
         plantRender.setDescription(plant.getDescription());
         plantRender.setPicture(new String(decodedPicture));
+        plantRender.setMaps(plant.getMaps());
         if (plant.getSite().equals(user.getSite())) {
             return ResponseEntity.ok(parser.writeValueAsString(plantRender));
         } else {

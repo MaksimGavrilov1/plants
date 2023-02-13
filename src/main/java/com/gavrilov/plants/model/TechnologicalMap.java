@@ -1,5 +1,6 @@
 package com.gavrilov.plants.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -20,10 +21,17 @@ public class TechnologicalMap {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    private String title;
     private String temperatureMin;
     private String temperatureMax;
     private String humidityMin;
     private String humidityMax;
+    private String growthPeriod;
+
+    @ManyToOne
+    @JoinColumn(name="plant_id", nullable=false)
+    @JsonBackReference
+    private Plant plant;
 
     @OneToMany(mappedBy="map")
     @JsonManagedReference
