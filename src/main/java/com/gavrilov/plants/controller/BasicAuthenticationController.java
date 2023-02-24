@@ -30,6 +30,7 @@ public class BasicAuthenticationController {
 
     @PostMapping(path = "/register")
     public ResponseEntity<String> register(@RequestBody PlantUserDto user) {
+//        if (userRepository)
         Site siteFromDB = siteRepository.save(new Site());
         PlantUser newUser = new PlantUser();
         newUser.setPassword(passwordEncoder.encode(user.getPassword()));

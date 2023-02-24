@@ -26,9 +26,9 @@ public class TechnologicalMapServiceImpl implements TechnologicalMapService {
         TechnologicalMap newMap = new TechnologicalMap();
         newMap.setTitle(map.getTitle());
         newMap.setTemperatureMax(String.valueOf(map.getTemperatureMax()));
-        newMap.setTemperatureMax(String.valueOf(map.getTemperatureMin()));
-        newMap.setTemperatureMax(String.valueOf(map.getHumidityMax()));
-        newMap.setTemperatureMax(String.valueOf(map.getHumidityMin()));
+        newMap.setTemperatureMin(String.valueOf(map.getTemperatureMin()));
+        newMap.setHumidityMax(String.valueOf(map.getHumidityMax()));
+        newMap.setHumidityMin(String.valueOf(map.getHumidityMin()));
         newMap.setPlant(plant);
         return repository.save(newMap);
     }
