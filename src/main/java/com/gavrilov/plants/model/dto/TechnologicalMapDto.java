@@ -10,10 +10,10 @@ import java.util.List;
 public class TechnologicalMapDto {
 
     private String title;
-    private Integer temperatureMin;
-    private Integer temperatureMax;
-    private Integer humidityMin;
-    private Integer humidityMax;
+    private Double temperatureMin;
+    private Double temperatureMax;
+    private Double humidityMin;
+    private Double humidityMax;
     private Integer growthPeriod;
     private Long plantId;
     private List<MapConditionDto> conditions;

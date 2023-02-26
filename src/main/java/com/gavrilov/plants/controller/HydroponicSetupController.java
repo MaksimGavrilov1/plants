@@ -58,4 +58,18 @@ public class HydroponicSetupController {
             return ResponseEntity.status(404).body("Setup not found");
         }
     }
+
+    @GetMapping("/setup/plant/{setupId}")
+    public ResponseEntity<String> plantCulture(@AuthenticationPrincipal PlantUser user, @PathVariable Long setupId) throws JsonProcessingException {
+        HydroponicSetup setup = setupService.findSetup(setupId);
+        if (setup != null) {
+            if (user.getSite().equals(setup.getContainer().getSite())) {
+                return ResponseEntity.ok(parser.writeValueAsString(setupService.convertToRender(setup)));
+            } else {
+                return ResponseEntity.status(403).body("No access to this object");
+            }
+        } else {
+            return ResponseEntity.status(404).body("Setup not found");
+        }
+    }
 }
