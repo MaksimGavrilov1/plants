@@ -5,9 +5,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CellDtoRender {
+public class PlantSeedDto {
 
     private String plantTitle;
-    private Integer level;
-    private String techMapTitle;
+    private Integer plantAmount;
+    private String mapPlantTitle;
 }

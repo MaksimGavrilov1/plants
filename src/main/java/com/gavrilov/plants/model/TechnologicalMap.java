@@ -37,6 +37,10 @@ public class TechnologicalMap {
     @JsonManagedReference
     private List<MapCondition> conditions;
 
+    @OneToMany(mappedBy="map")
+    @JsonManagedReference
+    private List<SetupCell> usedInCells;
+
 
     public Long getId() {
         return id;

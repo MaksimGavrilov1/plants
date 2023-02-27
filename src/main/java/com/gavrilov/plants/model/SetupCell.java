@@ -26,6 +26,10 @@ public class SetupCell {
     @JsonBackReference
     private Plant plant;
 
+    @ManyToOne
+    @JoinColumn(name="technological_map_id")
+    @JsonBackReference
+    private TechnologicalMap map;
 
 
     public Long getId() {

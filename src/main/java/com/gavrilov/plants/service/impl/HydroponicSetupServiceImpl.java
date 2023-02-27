@@ -6,10 +6,14 @@ import com.gavrilov.plants.repository.HydroponicSetupRepository;
 import com.gavrilov.plants.repository.SetupCellRepository;
 import com.gavrilov.plants.service.HydroponicSetupService;
 import com.gavrilov.plants.service.PlantService;
+import jakarta.persistence.EntityNotFoundException;
+import org.hibernate.ObjectNotFoundException;
+import org.hibernate.boot.MappingNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,18 +61,21 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
         renderObject.setAddress(setup.getAddress());
         renderObject.setLevelsAmount(getNumberOfLevels(setup));
         renderObject.setCellsPerLevel(getCellsPerLevel(setup));
-        renderObject.setFreeCells((int) setup.getLevels().stream().filter(x-> x.getPlant() == null).count());
-        renderObject.setOccupiedCells((int) setup.getLevels().stream().filter(x->x.getPlant() != null).count());
+        renderObject.setFreeCells((int) setup.getLevels().stream().filter(x -> x.getPlant() == null).count());
+        renderObject.setOccupiedCells((int) setup.getLevels().stream().filter(x -> x.getPlant() != null).count());
         CellDtoRender cell;
         List<CellDtoRender> cells = new ArrayList<>();
         List<String> plantsTitles = new ArrayList<>();
-        for (SetupCell cellDB : setup.getLevels()){
+        List<SetupCell> cellsDB = setup.getLevels().stream().sorted(Comparator.comparing(SetupCell::getLevel).thenComparing(SetupCell::getId)).toList();
+        for (SetupCell cellDB : cellsDB) {
             cell = new CellDtoRender();
             String plantTitle = cellDB.getPlant() == null ? null : cellDB.getPlant().getTitle();
+            String mapTitle = cellDB.getMap() == null ? null : cellDB.getMap().getTitle();
             cell.setPlantTitle(plantTitle);
             cell.setLevel(cellDB.getLevel());
+            cell.setTechMapTitle(mapTitle);
             cells.add(cell);
-            if (plantTitle != null) {
+            if (plantTitle != null && !plantsTitles.contains(plantTitle)) {
                 plantsTitles.add(plantTitle);
             }
         }
@@ -82,12 +89,46 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
         PlantSeedDtoRender renderObject = new PlantSeedDtoRender();
         List<Plant> plants = plantService.findBySite(setup.getContainer().getSite());
         List<TechnologicalMapDtoRender> maps = new ArrayList<>();
-        plants.forEach(x-> x.getMaps().forEach(map->maps.add(convertMap(map))));
+        plants.forEach(x -> x.getMaps().forEach(map -> maps.add(convertMap(map))));
         renderObject.setSetupAddress(setup.getAddress());
         renderObject.setPlantsTitles(plants.stream().map(Plant::getTitle).collect(Collectors.toList()));
         renderObject.setTechMaps(maps);
-        renderObject.setFreeCells(Math.toIntExact(setup.getLevels().stream().filter(x -> x.getPlant() == null).count()));
+        renderObject.setFreeCells(100);
+        int count = 0;
+        for (SetupCell cell : setup.getLevels()) {
+            if (cell.getPlant() == null) {
+                count++;
+            }
+        }
+        renderObject.setFreeCells(count);
+        //renderObject.setFreeCells(Math.toIntExact(setup.getLevels().stream().filter(x -> x.getMap() == null).toList().size()));
         return renderObject;
+    }
+
+    @Override
+    public HydroponicSetup plantCulture(PlantSeedDto plantObject, PlantUser user, HydroponicSetup setup) {
+        Plant plant = plantService.findByTitleAndSite(plantObject.getPlantTitle(), user.getSite());
+        TechnologicalMap map = plant.getMaps().stream().filter(x -> x.getTitle().equals(plantObject.getMapPlantTitle())).findFirst().orElse(null);
+        List<SetupCell> newCells = new ArrayList<>();
+        if (plant != null) {
+            if (map != null) {
+                List<SetupCell> cells = setup.getLevels().stream().filter(x->x.getPlant() == null).sorted(Comparator.comparing(SetupCell::getLevel).thenComparing(SetupCell::getId)).toList();
+                for (int i = 0; i < plantObject.getPlantAmount(); i++) {
+                    SetupCell cell = cells.get(i);
+                    if (cell.getPlant() == null) {
+                        cell.setPlant(plant);
+                        cell.setMap(map);
+                        cellRepository.save(cell);
+                    }
+
+                }
+                return setup;
+            } else {
+                throw new EntityNotFoundException("Plant doesn't have this map");
+            }
+        } else {
+            throw new EntityNotFoundException("Plant not found");
+        }
     }
 
     private TechnologicalMapDtoRender convertMap(TechnologicalMap map) {
@@ -98,7 +139,7 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
         renderMap.setHumidityMax(Float.valueOf(map.getHumidityMax()));
         renderMap.setHumidityMin(Float.valueOf(map.getHumidityMin()));
 //        renderMap.setGrowthPeriod(Integer.valueOf(map.getGrowthPeriod()));
-        renderMap.setConditions(map.getConditions().stream().map(x-> new MapConditionDtoRender(x.getDescription())).collect(Collectors.toList()));
+        renderMap.setConditions(map.getConditions().stream().map(x -> new MapConditionDtoRender(x.getDescription())).collect(Collectors.toList()));
         renderMap.setPlantTitle(map.getPlant().getTitle());
         return renderMap;
     }

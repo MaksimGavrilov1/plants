@@ -24,7 +24,8 @@ public class HydroponicSetup {
     @JsonBackReference
     private Container container;
 
-    @OneToMany(mappedBy="setup")
+    @OneToMany(mappedBy="setup", fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<SetupCell> levels;
+
 }

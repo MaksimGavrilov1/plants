@@ -6,6 +6,7 @@ import com.gavrilov.plants.model.Container;
 import com.gavrilov.plants.model.HydroponicSetup;
 import com.gavrilov.plants.model.PlantUser;
 import com.gavrilov.plants.model.dto.HydroponicSetupDto;
+import com.gavrilov.plants.model.dto.PlantSeedDto;
 import com.gavrilov.plants.service.ContainerService;
 import com.gavrilov.plants.service.HydroponicSetupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,21 @@ public class HydroponicSetupController {
         if (setup != null) {
             if (user.getSite().equals(setup.getContainer().getSite())) {
                 return ResponseEntity.ok(parser.writeValueAsString(setupService.convertToRender(setup)));
+            } else {
+                return ResponseEntity.status(403).body("No access to this object");
+            }
+        } else {
+            return ResponseEntity.status(404).body("Setup not found");
+        }
+    }
+
+    @PostMapping("/setup/plant/{setupId}")
+    public ResponseEntity<String> plantCulture(@AuthenticationPrincipal PlantUser user, @PathVariable Long setupId, @RequestBody PlantSeedDto plantObject) throws JsonProcessingException {
+        HydroponicSetup setup = setupService.findSetup(setupId);
+        if (setup != null) {
+            if (user.getSite().equals(setup.getContainer().getSite())) {
+                setupService.plantCulture(plantObject, user, setup);
+                return ResponseEntity.ok("");
             } else {
                 return ResponseEntity.status(403).body("No access to this object");
             }

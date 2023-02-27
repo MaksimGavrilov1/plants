@@ -10,5 +10,7 @@ import java.util.List;
 
 @Transactional
 public interface PlantRepository extends JpaRepository<Plant, Long> {
+    Plant findByTitleAndSite(String title, Site site);
+
     List<Plant> findBySite(Site site);
 }

@@ -27,6 +27,11 @@ public class PlantServiceImpl implements PlantService {
     }
 
     @Override
+    public Plant findByTitleAndSite(String title, Site site) {
+        return plantRepository.findByTitleAndSite(title, site);
+    }
+
+    @Override
     public Plant findById(Long id) {
         return plantRepository.findById(id).orElse(null);
     }

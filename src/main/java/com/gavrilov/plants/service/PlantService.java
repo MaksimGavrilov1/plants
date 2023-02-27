@@ -14,4 +14,6 @@ public interface PlantService {
     List<Plant> findBySite(Site site);
 
     Plant createPlant(PlantDto plantDto);
+
+    Plant findByTitleAndSite(String title, Site site);
 }

@@ -2,8 +2,10 @@ package com.gavrilov.plants.service;
 
 import com.gavrilov.plants.model.Container;
 import com.gavrilov.plants.model.HydroponicSetup;
+import com.gavrilov.plants.model.PlantUser;
 import com.gavrilov.plants.model.dto.HydroponicSetupDto;
 import com.gavrilov.plants.model.dto.HydroponicSetupDtoRender;
+import com.gavrilov.plants.model.dto.PlantSeedDto;
 import com.gavrilov.plants.model.dto.PlantSeedDtoRender;
 
 public interface HydroponicSetupService {
@@ -15,5 +17,7 @@ public interface HydroponicSetupService {
     HydroponicSetupDtoRender convert(HydroponicSetup setup);
 
     PlantSeedDtoRender convertToRender(HydroponicSetup setup);
+
+    HydroponicSetup plantCulture(PlantSeedDto plantObject, PlantUser user, HydroponicSetup setup);
 
 }
