@@ -28,9 +28,21 @@ public class BasicAuthenticationController {
         return new AuthenticationBean("You are authenticated");
     }
 
+    @GetMapping("/auth/username/exists")
+    public ResponseEntity<String> isUsernameExists(@RequestBody String username) {
+        if (userRepository.existsByUsername(username)) {
+            return ResponseEntity.status(418).body("User already exists");
+        } else {
+            return ResponseEntity.ok("");
+        }
+    }
+
     @PostMapping(path = "/register")
     public ResponseEntity<String> register(@RequestBody PlantUserDto user) {
 //        if (userRepository)
+        if (userRepository.existsByUsername(user.getUsername())) {
+            return ResponseEntity.badRequest().body("user with this username already exists");
+        }
         Site siteFromDB = siteRepository.save(new Site());
         PlantUser newUser = new PlantUser();
         newUser.setPassword(passwordEncoder.encode(user.getPassword()));

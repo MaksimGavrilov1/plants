@@ -15,7 +15,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 @RestController
 @CrossOrigin(origins = { "http://localhost:3000", "http://localhost:4200" })
@@ -30,7 +32,21 @@ public class PlantsController {
 
     @GetMapping("/plants/all")
     public ResponseEntity<String> getAll(@AuthenticationPrincipal PlantUser user) throws JsonProcessingException {
-        return ResponseEntity.ok(parser.writeValueAsString(plantService.findBySite(user.getSite())));
+        List<Plant> plants = plantService.findBySite(user.getSite());
+        List<PlantDtoRender> plantsToRender = new ArrayList<>();
+        PlantDtoRender renderPlant;
+        byte[] decodedPicture;
+        for (Plant plant:
+             plants) {
+            decodedPicture = Base64.getDecoder().decode(plant.getPicture());
+            renderPlant = new PlantDtoRender();
+            renderPlant.setId(plant.getId());
+            renderPlant.setTitle(plant.getTitle());
+            renderPlant.setDescription(plant.getDescription());
+            renderPlant.setPicture(new String(decodedPicture));
+            plantsToRender.add(renderPlant);
+        }
+        return ResponseEntity.ok(parser.writeValueAsString(plantsToRender));
     }
 
     @PostMapping("/plants/create")

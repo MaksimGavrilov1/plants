@@ -42,7 +42,7 @@ public class SecurityConfiguration {
                 .csrf().disable()
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/register", "/basicauth").permitAll()
+                        .requestMatchers("/register", "/basicauth", "/auth/username/exists").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityContextHolderAwareRequestFilter(), UsernamePasswordAuthenticationFilter.class)
