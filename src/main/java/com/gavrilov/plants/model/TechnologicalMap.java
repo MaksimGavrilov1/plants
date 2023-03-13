@@ -41,6 +41,10 @@ public class TechnologicalMap {
     @JsonManagedReference
     private List<SetupCell> usedInCells;
 
+    @OneToMany(mappedBy="map")
+    @JsonManagedReference
+    private List<PlantHistory> historyRows;
+
 
     public Long getId() {
         return id;

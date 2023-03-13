@@ -9,6 +9,7 @@ import com.gavrilov.plants.model.dto.HydroponicSetupDto;
 import com.gavrilov.plants.model.dto.PlantSeedDto;
 import com.gavrilov.plants.service.ContainerService;
 import com.gavrilov.plants.service.HydroponicSetupService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.codec.ResourceEncoder;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:4200"})
+@Transactional
 public class HydroponicSetupController {
 
     @Autowired

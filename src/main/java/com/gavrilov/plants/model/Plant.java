@@ -2,10 +2,12 @@ package com.gavrilov.plants.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 
 
 import java.util.List;
@@ -37,6 +39,10 @@ public class Plant {
     @OneToMany(mappedBy="plant")
     @JsonManagedReference
     private List<TechnologicalMap> maps;
+
+    @OneToMany(mappedBy="plant")
+    @JsonManagedReference
+    private List<PlantHistory> historyRows;
 
     @ManyToOne
     @JoinColumn(name="site_id", nullable=false)

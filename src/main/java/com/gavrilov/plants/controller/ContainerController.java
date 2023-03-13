@@ -2,11 +2,13 @@ package com.gavrilov.plants.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gavrilov.plants.async.MqttStarter;
 import com.gavrilov.plants.model.Container;
 import com.gavrilov.plants.model.PlantUser;
 import com.gavrilov.plants.model.dto.ContainerDto;
 import com.gavrilov.plants.repository.PlantUserRepository;
 import com.gavrilov.plants.service.ContainerService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -24,12 +26,15 @@ import java.util.NoSuchElementException;
 
 @RestController
 @CrossOrigin(origins = { "http://localhost:3000", "http://localhost:4200" })
+@Transactional
 public class ContainerController {
 
     @Autowired
     private ContainerService containerService;
     @Autowired
     private PlantUserRepository plantUserRepository;
+    @Autowired
+    private MqttStarter starter;
     private final ObjectMapper parser = new ObjectMapper();
 
     @GetMapping("/container/all")
@@ -49,6 +54,7 @@ public class ContainerController {
     @PostMapping("/container/create")
     public ResponseEntity<String> create(@RequestBody ContainerDto container, @AuthenticationPrincipal PlantUser user) {
         containerService.createContainer(container, user);
+        starter.startBroker(user.getSite());
         return ResponseEntity.status(HttpStatusCode.valueOf(200)).body("");
     }
 

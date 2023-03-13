@@ -6,6 +6,7 @@ import com.gavrilov.plants.model.Site;
 import com.gavrilov.plants.model.dto.ContainerDto;
 import com.gavrilov.plants.repository.ContainerRepository;
 import com.gavrilov.plants.service.ContainerService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ public class ContainerServiceImpl implements ContainerService {
     private ContainerRepository containerRepository;
 
     @Override
+    @Transactional
     public List<Container> findContainersBySite(Site site) {
         List<Container> myCont = containerRepository.findBySite(site);
         return myCont;

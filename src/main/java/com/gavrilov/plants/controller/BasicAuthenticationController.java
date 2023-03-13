@@ -1,7 +1,7 @@
 package com.gavrilov.plants.controller;
 
 import com.gavrilov.plants.model.PlantUser;
-import com.gavrilov.plants.model.Role;
+import com.gavrilov.plants.model.enums.Role;
 import com.gavrilov.plants.model.Site;
 import com.gavrilov.plants.model.dto.PlantUserDto;
 import com.gavrilov.plants.repository.PlantUserRepository;

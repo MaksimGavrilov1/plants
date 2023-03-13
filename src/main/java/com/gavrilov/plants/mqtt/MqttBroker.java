@@ -2,8 +2,12 @@ package com.gavrilov.plants.mqtt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gavrilov.plants.model.Device;
 import com.gavrilov.plants.model.SensorData;
+import com.gavrilov.plants.model.enums.SensorDataStatus;
+import com.gavrilov.plants.model.Site;
 import com.gavrilov.plants.repository.SensorDataRepository;
+import com.gavrilov.plants.service.DeviceService;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import org.eclipse.paho.client.mqttv3.*;
@@ -24,8 +28,9 @@ import java.security.KeyStore;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.CountDownLatch;
+import java.util.List;
 
 @Component
 @Getter
@@ -33,6 +38,8 @@ public class MqttBroker {
 
     @Autowired
     private SensorDataRepository sensorDataRepository;
+    @Autowired
+    private DeviceService deviceService;
     @Value("${broker.url}")
     private String brokerURL;
     @Value("${device.id}")
@@ -52,6 +59,16 @@ public class MqttBroker {
     private String deviceEvents;
     private String deviceCommands;
 
+    private Boolean isRunning = false;
+
+    public Boolean getRunning() {
+        return isRunning;
+    }
+
+    public void setRunning(Boolean running) {
+        isRunning = running;
+    }
+
     public enum QoS {
         AT_MOST_ONCE(0),
         AT_LEAST_ONCE(1);
@@ -69,8 +86,8 @@ public class MqttBroker {
 
     @PostConstruct
     private void postConstruct() {
-        deviceEvents = "$devices/" + deviceID + "/events";
-        deviceCommands = "$devices/" + deviceID + "/commands";
+        deviceEvents = "$devices/" + deviceID + "/events/";
+        deviceCommands = "$devices/" + deviceID + "/commands/";
     }
 
     private static final String TRUSTED_ROOT = "-----BEGIN CERTIFICATE-----\n" +
@@ -107,22 +124,37 @@ public class MqttBroker {
     private MqttSession registry;
     private MqttSession device;
 
+    private List<MqttSession> sessionList = new ArrayList<>();
+
     public class MqttSession implements MqttCallback {
         private MqttClient client;
         private String clientId;
-        private Runnable onDoneHandler;
+        private Test onDoneHandler;
         private QoS messageQos = QoS.AT_LEAST_ONCE;
+        private Device device;
+
+        public Device getDevice() {
+            return device;
+        }
+
+        public void setDevice(Device device) {
+            this.device = device;
+        }
 
         @Override
         public void connectionLost(Throwable cause) {
             System.out.println("connectionLost");
+            System.err.println(cause.getMessage() +  cause);
         }
 
         @Override
         public void messageArrived(String topic, MqttMessage message)
                 throws Exception {
-//            System.out.println(message);
-            messageData = message.toString();
+            System.out.println(message);
+            onDoneHandler.runWithArgs(message.toString());
+//            synchronized (this) {
+//
+//            }
 //            SensorData sensorData;
 //            ObjectMapper objectMapper = new ObjectMapper();
 //            sensorData = objectMapper.readValue(message.toString(), SensorData.class);
@@ -133,7 +165,7 @@ public class MqttBroker {
 //            if (message.toString().contains("Temperature")) {
 
 //            }
-            onDoneHandler.run();
+
         }
 
         @Override
@@ -182,6 +214,8 @@ public class MqttBroker {
             connOpts.setConnectionTimeout(60); // Seconds.
             connOpts.setUserName(login.trim());
             connOpts.setPassword(password.trim().toCharArray());
+            connOpts.setKeepAliveInterval(15);
+            connOpts.setConnectionTimeout(30);
             client.connect(connOpts);
         }
 
@@ -234,7 +268,7 @@ public class MqttBroker {
             return ctx.getSocketFactory();
         }
 
-        public void SetOnDoneHandler(Runnable onDone) {
+        public void SetOnDoneHandler(Test onDone) {
             onDoneHandler = onDone;
         }
 
@@ -259,14 +293,33 @@ public class MqttBroker {
         }
     }
 
-    class Test extends Thread {
+    class Test implements Runnable {
+
+        private String message;
+        public void runWithArgs(String message){
+            this.message = message;
+            run();
+        }
 
         @Override
         public void run() {
 
             try {
-                SensorData sensorData = objectMapper.readValue(messageData, SensorData.class);
+                SensorData sensorData = objectMapper.readValue(message, SensorData.class);
                 sensorData.setTime(new Timestamp(new Date().getTime()));
+                sensorData.setStatus(SensorDataStatus.HISTORY);
+                SensorData fromDb = sensorDataRepository.findByDeviceIdAndStatus(sensorData.getDeviceId(), SensorDataStatus.CONSTANT);
+                if (fromDb == null) {
+                    sensorData.setStatus(SensorDataStatus.CONSTANT);
+                    sensorDataRepository.save(sensorData);
+                } else {
+                    System.out.println("CONSTANT: " + fromDb.getTemperature() + " ID: " + fromDb.getId());
+                    fromDb.setTime(sensorData.getTime());
+                    fromDb.setTemperature(sensorData.getTemperature());
+                    fromDb.setHumidity(sensorData.getHumidity());
+                    sensorDataRepository.save(fromDb);
+                }
+                System.out.println("PRE SAVE HISTORY");
                 sensorDataRepository.save(sensorData);
             } catch (JsonProcessingException e) {
                 System.out.println("Failed to push" + e.getMessage());
@@ -274,7 +327,7 @@ public class MqttBroker {
         }
     }
 
-    public void Run(boolean withLogin) {
+    public void Run(boolean withLogin, Site site) {
         try {
             // certs structure:
             //   /my_registry        Registry directory |currentDir|.
@@ -285,35 +338,65 @@ public class MqttBroker {
             //   `- cert.pem
             //   `- key.pem
             //   `- keystore.p12     registry certs pair in java friendly format
-            String currentDir = System.getProperty("user.dir");
+            List<Device> deviceOnSite = deviceService.findAllBySite(site);
+            System.out.println("SESSIONS: ");
+            sessionList.forEach(System.out::println);
+            boolean isPresented = false;
+            for (Device device:
+                 deviceOnSite) {
+                isPresented = sessionList.stream().filter(x->device.equals(x.getDevice())).findFirst().isPresent();
+                if (!isPresented){
+                    MqttSession newDevice = new MqttSession();
+                    String uniqueIdForDevice = MqttAsyncClient.generateClientId() + "device";
+                    String uniqueIdForRegistry = MqttAsyncClient.generateClientId() + "registry";
+                    newDevice.StartWithLogin(device.getBrokerURL(),uniqueIdForDevice , device.getDeviceId(), device.getDevicePassword() );
 
-            CountDownLatch cdl = new CountDownLatch(2);
-
-            device = new MqttSession();
-            if (withLogin) {
-                device.StartWithLogin(brokerURL, "deviceJavaSmpleLogin", deviceID,
-                        devicePassword);
-            } else {
-                device.Start(brokerURL, "deviceJavaSmple",
-                        Paths.get(currentDir, "device").toString());
+                    MqttSession newRegistry = new MqttSession();
+                    newRegistry.StartWithLogin(device.getBrokerURL(), uniqueIdForRegistry, device.getRegistryId(), device.getRegistryPassword());
+                    newRegistry.SetOnDoneHandler(new Test());
+                    newRegistry.Subscribe("$devices/" + device.getDeviceId() + "/events/");
+                    newDevice.Subscribe("$devices/" + device.getDeviceId() + "/commands");
+                    newDevice.setDevice(device);
+                    newRegistry.setDevice(device);
+                    sessionList.add(newDevice);
+                    sessionList.add(newRegistry);
+                }
             }
 
-            device.SetOnDoneHandler(cdl::countDown);
-            device.SetOnDoneHandler(new PushToDatabase());
 
-            registry = new MqttSession();
-            if (withLogin) {
-                registry.StartWithLogin(brokerURL, "registyJavaSmpleLogin",
-                        registryID, regPassword);
-            } else {
-                registry.Start(brokerURL, "registyJavaSmple", currentDir.toString());
-            }
-            registry.SetOnDoneHandler(new Test());
 
-            registry.Subscribe(deviceEvents);
-            registry.Subscribe("$devices/#");
-            device.Subscribe(deviceCommands);
-
+//            String currentDir = System.getProperty("user.dir");
+//
+//
+//            CountDownLatch cdl = new CountDownLatch(2);
+//
+//            device = new MqttSession();
+//            if (withLogin) {
+//                device.StartWithLogin(brokerURL, "deviceJavaSmpleLogin", deviceID,
+//                        devicePassword);
+//            } else {
+//                device.Start(brokerURL, "deviceJavaSmple",
+//                        Paths.get(currentDir, "device").toString());
+//            }
+//
+////            device.SetOnDoneHandler(cdl::countDown);
+////            device.SetOnDoneHandler(new PushToDatabase());
+//
+//            registry = new MqttSession();
+//            if (withLogin) {
+//                registry.StartWithLogin(brokerURL, "registyJavaSmpleLogin",
+//                        registryID, regPassword);
+//            } else {
+//                registry.Start(brokerURL, "registyJavaSmple", currentDir.toString());
+//            }
+//            registry.SetOnDoneHandler(new Test());
+//
+//            System.out.println(deviceEvents);
+//            registry.Subscribe(deviceEvents);
+////            registry.Subscribe("$devices/#");
+//            device.Subscribe(deviceCommands);
+//
+//            isRunning = true;
 //            registry.Publish(deviceCommands, "somecommand");
 //            device.Publish(deviceEvents, "someevent");
 //            registry.Stop();

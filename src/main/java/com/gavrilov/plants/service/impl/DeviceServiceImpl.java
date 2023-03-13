@@ -2,6 +2,8 @@ package com.gavrilov.plants.service.impl;
 
 import com.gavrilov.plants.model.Device;
 import com.gavrilov.plants.model.PlantUser;
+import com.gavrilov.plants.model.Site;
+import com.gavrilov.plants.model.dto.DeviceDto;
 import com.gavrilov.plants.repository.DeviceRepository;
 import com.gavrilov.plants.service.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,5 +23,23 @@ public class DeviceServiceImpl implements DeviceService {
         List<Device> devices = deviceRepository.findByOwner(user);
         List<String> ids = devices.stream().map(Device::getDeviceId).toList();
         return ids;
+    }
+
+    @Override
+    public List<Device> findAllBySite(Site site) {
+        return deviceRepository.findBySite(site);
+    }
+
+    @Override
+    public Device save(DeviceDto dto, PlantUser user) {
+        Device device = new Device();
+        device.setDeviceId(dto.getDeviceId());
+        device.setDevicePassword(dto.getDevicePassword());
+        device.setRegistryId(dto.getRegistryId());
+        device.setRegistryPassword(dto.getRegistryPassword());
+        device.setBrokerURL(dto.getBrokerURL());
+        device.setOwner(user);
+        device.setSite(user.getSite());
+        return deviceRepository.save(device);
     }
 }

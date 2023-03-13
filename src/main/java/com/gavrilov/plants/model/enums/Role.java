@@ -1,4 +1,4 @@
-package com.gavrilov.plants.model;
+package com.gavrilov.plants.model.enums;
 
 import org.springframework.security.core.GrantedAuthority;
 

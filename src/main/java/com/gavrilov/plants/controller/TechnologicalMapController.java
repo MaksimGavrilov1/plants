@@ -11,6 +11,7 @@ import com.gavrilov.plants.model.dto.TechnologicalMapDto;
 import com.gavrilov.plants.repository.MapConditionRepository;
 import com.gavrilov.plants.service.PlantService;
 import com.gavrilov.plants.service.TechnologicalMapService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.http.HttpStatusCode;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:4200"})
+@Transactional
 public class TechnologicalMapController {
 
     @Autowired

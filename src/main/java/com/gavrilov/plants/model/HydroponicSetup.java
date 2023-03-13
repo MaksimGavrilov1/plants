@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "hydroponic_setup")
@@ -23,6 +24,10 @@ public class HydroponicSetup {
     @JoinColumn(name="container_id", nullable=false)
     @JsonBackReference
     private Container container;
+
+    @OneToMany(mappedBy="setup")
+    @JsonManagedReference
+    private List<PlantHistory> historyRecords;
 
     @OneToMany(mappedBy="setup", fetch = FetchType.LAZY)
     @JsonManagedReference

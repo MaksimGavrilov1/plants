@@ -33,6 +33,10 @@ public class Site {
     @JsonManagedReference
     private Set<Plant> plants;
 
+    @OneToMany(mappedBy="site")
+    @JsonManagedReference
+    private Set<Device> devices;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

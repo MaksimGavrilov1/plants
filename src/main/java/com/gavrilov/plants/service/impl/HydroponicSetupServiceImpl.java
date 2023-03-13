@@ -3,6 +3,7 @@ package com.gavrilov.plants.service.impl;
 import com.gavrilov.plants.model.*;
 import com.gavrilov.plants.model.dto.*;
 import com.gavrilov.plants.repository.HydroponicSetupRepository;
+import com.gavrilov.plants.repository.PlantHistoryRepository;
 import com.gavrilov.plants.repository.SetupCellRepository;
 import com.gavrilov.plants.service.HydroponicSetupService;
 import com.gavrilov.plants.service.PlantService;
@@ -12,10 +13,8 @@ import org.hibernate.boot.MappingNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.sql.Timestamp;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -28,6 +27,9 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
     private HydroponicSetupRepository repository;
     @Autowired
     private SetupCellRepository cellRepository;
+
+    @Autowired
+    private PlantHistoryRepository historyRepository;
 
     @Autowired
     private PlantService plantService;
@@ -110,15 +112,30 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
         Plant plant = plantService.findByTitleAndSite(plantObject.getPlantTitle(), user.getSite());
         TechnologicalMap map = plant.getMaps().stream().filter(x -> x.getTitle().equals(plantObject.getMapPlantTitle())).findFirst().orElse(null);
         List<SetupCell> newCells = new ArrayList<>();
+        UUID uuid = UUID.randomUUID();
+        Timestamp dateOfPlant = new Timestamp(new Date().getTime());
+
         if (plant != null) {
             if (map != null) {
                 List<SetupCell> cells = setup.getLevels().stream().filter(x->x.getPlant() == null).sorted(Comparator.comparing(SetupCell::getLevel).thenComparing(SetupCell::getId)).toList();
+
                 for (int i = 0; i < plantObject.getPlantAmount(); i++) {
+                    PlantHistory historyRecord = new PlantHistory();
                     SetupCell cell = cells.get(i);
                     if (cell.getPlant() == null) {
+
+                        //fill data for history
+                        historyRecord.setSetup(setup);
+                        historyRecord.setPlant(plant);
+                        historyRecord.setMap(map);
+                        historyRecord.setDateOfPlant(dateOfPlant);
+                        historyRecord.setHarvestId(uuid.toString());
+
                         cell.setPlant(plant);
                         cell.setMap(map);
-                        cellRepository.save(cell);
+                        SetupCell fromDb = cellRepository.save(cell);
+                        historyRecord.setCell(fromDb);
+                        historyRepository.save(historyRecord);
                     }
 
                 }
@@ -129,6 +146,12 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
         } else {
             throw new EntityNotFoundException("Plant not found");
         }
+    }
+
+    private void createTasks(String harvestId) {
+        Task harvestTask = new Task();
+        harvestTask.setHarvestUUID(harvestId);
+        harvestTask.setTitle("");
     }
 
     private TechnologicalMapDtoRender convertMap(TechnologicalMap map) {

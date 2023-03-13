@@ -1,5 +1,6 @@
 package com.gavrilov.plants.model;
 
+import com.gavrilov.plants.model.enums.SensorDataStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,4 +20,6 @@ public class SensorData {
     private Float temperature;
     private Float humidity;
     private Timestamp time;
+    @Enumerated(EnumType.STRING)
+    private SensorDataStatus status;
 }

@@ -8,6 +8,7 @@ import com.gavrilov.plants.model.dto.PlantDto;
 import com.gavrilov.plants.model.dto.PlantDtoRender;
 import com.gavrilov.plants.repository.PlantRepository;
 import com.gavrilov.plants.service.PlantService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = { "http://localhost:3000", "http://localhost:4200" })
+@Transactional
 public class PlantsController {
 
     @Autowired

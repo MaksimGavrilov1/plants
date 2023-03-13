@@ -27,3 +27,6 @@ insert into plant (description, title) values ('Parsley, or garden parsley (Petr
 
 insert into map_condition (description, technological_map_id) values ('3 seeds per pot', 1)
 insert into map_condition (description, technological_map_id) values ('Triangle form when put the seed in form', 1)
+
+insert into device(device_id, device_password, plant_user_id, brokerurl, registry_id, registry_password, site_id) values
+('arerg0th58ts13h9rnl7', '-', 1, 'ssl://mqtt.cloud.yandex.net:8883', 'arevbmasa1sc6igg32tr', '-', 1)

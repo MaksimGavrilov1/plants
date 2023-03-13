@@ -2,6 +2,7 @@ package com.gavrilov.plants.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.gavrilov.plants.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NonNull;

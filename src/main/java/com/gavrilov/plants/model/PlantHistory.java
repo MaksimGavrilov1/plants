@@ -1,20 +1,18 @@
 package com.gavrilov.plants.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-import java.util.Set;
+import java.sql.Timestamp;
 
 @Entity
-@Table(name = "setup_cell")
+@Table(name = "plant_history")
 @Getter
 @Setter
-public class SetupCell {
+public class PlantHistory {
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     @Id
@@ -22,8 +20,15 @@ public class SetupCell {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    private Integer level;
-
+    @ManyToOne
+    @JoinColumn(name="hydroponic_setup_id")
+    @JsonBackReference
+    private HydroponicSetup setup;
+    private String harvestId;
+    @ManyToOne
+    @JoinColumn(name="setup_cell_id")
+    @JsonBackReference
+    private SetupCell cell;
 
     @ManyToOne
     @JoinColumn(name="plant_id")
@@ -35,10 +40,7 @@ public class SetupCell {
     @JsonBackReference
     private TechnologicalMap map;
 
-    @OneToMany(mappedBy="cell")
-    @JsonManagedReference
-    private List<PlantHistory> historyRows;
-
+    private Timestamp dateOfPlant;
 
     public Long getId() {
         return id;
@@ -47,9 +49,4 @@ public class SetupCell {
     public void setId(Long id) {
         this.id = id;
     }
-
-    @ManyToOne
-    @JoinColumn(name="hydroponic_setup_id", nullable=false)
-    @JsonBackReference
-    private HydroponicSetup setup;
 }
