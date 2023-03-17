@@ -1,5 +1,6 @@
 package com.gavrilov.plants.repository;
 
+import com.gavrilov.plants.model.Container;
 import com.gavrilov.plants.model.Device;
 import com.gavrilov.plants.model.PlantUser;
 import com.gavrilov.plants.model.Site;
@@ -11,6 +12,8 @@ import java.util.List;
 
 @Repository
 public interface DeviceRepository extends JpaRepository<Device, Long> {
+    Device findByContainer(Container container);
+    Device findByDeviceId(String deviceId);
 
     List<Device> findByOwner(PlantUser owner);
 

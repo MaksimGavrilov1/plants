@@ -1,6 +1,7 @@
 package com.gavrilov.plants.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -27,6 +28,11 @@ public class Device {
     @ManyToOne
     @JoinColumn(name = "plant_user_id")
     private PlantUser owner;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "container_id", referencedColumnName = "id")
+    @JsonManagedReference
+    private Container container;
 
     @ManyToOne
     @JoinColumn(name="site_id", nullable=false)

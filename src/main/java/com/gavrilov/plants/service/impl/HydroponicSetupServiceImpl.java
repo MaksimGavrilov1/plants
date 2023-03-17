@@ -2,14 +2,19 @@ package com.gavrilov.plants.service.impl;
 
 import com.gavrilov.plants.model.*;
 import com.gavrilov.plants.model.dto.*;
+import com.gavrilov.plants.model.enums.TaskStatus;
+import com.gavrilov.plants.quartz.scheduler.HarvestJob;
+import com.gavrilov.plants.quartz.scheduler.RegularCheckJob;
 import com.gavrilov.plants.repository.HydroponicSetupRepository;
 import com.gavrilov.plants.repository.PlantHistoryRepository;
 import com.gavrilov.plants.repository.SetupCellRepository;
+import com.gavrilov.plants.repository.TaskRepository;
 import com.gavrilov.plants.service.HydroponicSetupService;
 import com.gavrilov.plants.service.PlantService;
 import jakarta.persistence.EntityNotFoundException;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.boot.MappingNotFoundException;
+import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +24,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import static org.quartz.TriggerBuilder.newTrigger;
 
 @Service
 public class HydroponicSetupServiceImpl implements HydroponicSetupService {
@@ -33,6 +42,11 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
 
     @Autowired
     private PlantService plantService;
+    @Autowired
+    private TaskRepository taskRepository;
+
+    @Autowired
+    private Scheduler scheduler;
 
     @Override
     public HydroponicSetup createSetup(HydroponicSetupDto dto, Container container) {
@@ -117,7 +131,7 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
 
         if (plant != null) {
             if (map != null) {
-                List<SetupCell> cells = setup.getLevels().stream().filter(x->x.getPlant() == null).sorted(Comparator.comparing(SetupCell::getLevel).thenComparing(SetupCell::getId)).toList();
+                List<SetupCell> cells = setup.getLevels().stream().filter(x -> x.getPlant() == null).sorted(Comparator.comparing(SetupCell::getLevel).thenComparing(SetupCell::getId)).toList();
 
                 for (int i = 0; i < plantObject.getPlantAmount(); i++) {
                     PlantHistory historyRecord = new PlantHistory();
@@ -130,14 +144,27 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
                         historyRecord.setMap(map);
                         historyRecord.setDateOfPlant(dateOfPlant);
                         historyRecord.setHarvestId(uuid.toString());
+                        historyRecord.setSite(plant.getSite());
+
 
                         cell.setPlant(plant);
                         cell.setMap(map);
                         SetupCell fromDb = cellRepository.save(cell);
                         historyRecord.setCell(fromDb);
                         historyRepository.save(historyRecord);
-                    }
 
+
+
+                    }
+                    //create tasks
+                    Map<String, Long> taskIds = createTasks(uuid.toString());
+
+                    //schedule job
+                    try {
+                        scheduleJobs(taskIds.get("controlId"), taskIds.get("harvestId"), uuid.toString(), Integer.valueOf(map.getGrowthPeriod()));
+                    } catch (SchedulerException e) {
+                        System.err.println("Unable to schedule jobs " + e.getMessage());
+                    }
                 }
                 return setup;
             } else {
@@ -148,10 +175,73 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
         }
     }
 
-    private void createTasks(String harvestId) {
+    private void scheduleJobs(Long controlTaskId, Long harvestTaskId, String harvestId, Integer growthPeriod) throws SchedulerException {
+        JobDataMap dataMapControl = new JobDataMap();
+        dataMapControl.putAsString("controlTaskId", controlTaskId);
+        dataMapControl.put("harvestId", harvestId);
+
+        JobDataMap dataMapHarvest = new JobDataMap();
+        dataMapHarvest.putAsString("harvestTaskId", harvestTaskId);
+        dataMapHarvest.put("harvestId", harvestId);
+
+        JobDetail controlJob = newJob()
+                .ofType(RegularCheckJob.class)
+                .storeDurably()
+                .usingJobData("harvestId", harvestId)
+                .usingJobData("controlTaskId", controlTaskId)
+                .withIdentity(JobKey.jobKey(controlTaskId.toString()))
+                .withDescription(harvestId + " " + controlTaskId)
+                .setJobData(dataMapControl)
+                .build();
+        Trigger controlTrigger = newTrigger()
+                .forJob(controlJob)
+                .withIdentity(TriggerKey.triggerKey(controlTaskId.toString()))
+                .withDescription("Trigger for control job")
+                .withSchedule(simpleSchedule().withIntervalInSeconds(60 * 60).repeatForever())
+                .build();
+        JobDetail harvestJob = newJob()
+                .ofType(HarvestJob.class)
+                .storeDurably()
+                .withIdentity(JobKey.jobKey(harvestTaskId.toString()))
+                .withDescription("Harvest job for task with ID=%d".formatted(controlTaskId))
+                .setJobData(dataMapHarvest)
+                .build();
+        Date date = new Date();
+        date.setTime(new Date().getTime() + 1000L * 60 * 60 * 24 * growthPeriod);
+        Trigger harvestTrigger = newTrigger()
+                .forJob(harvestJob)
+                .withIdentity(TriggerKey.triggerKey(harvestTaskId.toString()))
+                .withDescription("Trigger for harvest job")
+                .withSchedule(simpleSchedule().withRepeatCount(0))
+                .startAt(date)
+                .build();
+        //growthPeriod * 24 * 60 * 60
+        scheduler.scheduleJob(controlJob, controlTrigger);
+        scheduler.scheduleJob(harvestJob, harvestTrigger);
+    }
+
+    private Map<String, Long> createTasks(String harvestId) {
+        Map<String, Long> res = new HashMap<>();
+        List<PlantHistory> examples = historyRepository.findByHarvestId(harvestId);
+        PlantHistory example = examples.stream().findFirst().orElse(null);
+
+        if (example == null) {
+            return null;
+        }
+
         Task harvestTask = new Task();
+        harvestTask.setSite(example.getSite());
         harvestTask.setHarvestUUID(harvestId);
-        harvestTask.setTitle("");
+        harvestTask.setTitle("Harvest %s Planted: %s".formatted(example.getPlant().getTitle(), example.getDateOfPlant()));
+        harvestTask.setStatus(TaskStatus.IN_PROGRESS);
+        Task controlTask = new Task();
+        controlTask.setSite(example.getSite());
+        controlTask.setHarvestUUID(harvestId);
+        controlTask.setTitle("Control temperature and humidity levels for plant: %s; Planted: %s".formatted(example.getPlant().getTitle(), example.getDateOfPlant()));
+        controlTask.setStatus(TaskStatus.IN_PROGRESS);
+        res.put("harvestId", taskRepository.save(harvestTask).getId());
+        res.put("controlId", taskRepository.save(controlTask).getId());
+        return res;
     }
 
     private TechnologicalMapDtoRender convertMap(TechnologicalMap map) {

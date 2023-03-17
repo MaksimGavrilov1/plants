@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.util.Objects;
 
 @Entity
 @Table(name = "plant_history")
@@ -40,6 +41,11 @@ public class PlantHistory {
     @JsonBackReference
     private TechnologicalMap map;
 
+    @ManyToOne
+    @JoinColumn(name="site_id", nullable=false)
+    @JsonBackReference
+    private Site site;
+
     private Timestamp dateOfPlant;
 
     public Long getId() {
@@ -48,5 +54,18 @@ public class PlantHistory {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PlantHistory history = (PlantHistory) o;
+        return id.equals(history.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

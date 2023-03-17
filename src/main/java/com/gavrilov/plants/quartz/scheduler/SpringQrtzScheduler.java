@@ -42,14 +42,14 @@ public class SpringQrtzScheduler {
     }
 
     @Bean
-    public SchedulerFactoryBean scheduler(Trigger trigger, JobDetail job, DataSource quartzDataSource) throws SchedulerException {
+    public SchedulerFactoryBean scheduler(DataSource quartzDataSource) throws SchedulerException {
 
         SchedulerFactoryBean schedulerFactory = new SchedulerFactoryBean();
         schedulerFactory.setConfigLocation(new ClassPathResource("quartz.properties"));
 
         schedulerFactory.setJobFactory(springBeanJobFactory());
-        schedulerFactory.setJobDetails(job);
-        schedulerFactory.setTriggers(trigger);
+//        schedulerFactory.setJobDetails(job);
+//        schedulerFactory.setTriggers(trigger);
 
         // Comment the following line to use the default Quartz job store.
         schedulerFactory.setDataSource(quartzDataSource);
@@ -57,7 +57,7 @@ public class SpringQrtzScheduler {
     }
 
     @Bean
-    public Scheduler schedulerInstance(Trigger trigger, JobDetail job, SchedulerFactoryBean factory) throws SchedulerException {
+    public Scheduler schedulerInstance(SchedulerFactoryBean factory) throws SchedulerException {
         Scheduler scheduler = factory.getScheduler();
 //        scheduler.scheduleJob(job, trigger);
 //
@@ -67,30 +67,30 @@ public class SpringQrtzScheduler {
         return scheduler;
     }
 
-    @Bean
-    public JobDetailFactoryBean jobDetail() {
+//    @Bean
+//    public JobDetailFactoryBean jobDetail() {
+//
+//        JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
+////        jobDetailFactory.setJobClass(RegularCheckJob.class);
+////        jobDetailFactory.setName("Qrtz_Job_Detail");
+////        jobDetailFactory.setDescription("Invoke Sample Job service...");
+////        jobDetailFactory.setDurability(true);
+//        return jobDetailFactory;
+//    }
 
-        JobDetailFactoryBean jobDetailFactory = new JobDetailFactoryBean();
-        jobDetailFactory.setJobClass(RegularCheckJob.class);
-        jobDetailFactory.setName("Qrtz_Job_Detail");
-        jobDetailFactory.setDescription("Invoke Sample Job service...");
-        jobDetailFactory.setDurability(true);
-        return jobDetailFactory;
-    }
-
-    @Bean
-    public SimpleTriggerFactoryBean trigger(JobDetail job) {
-
-        SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
-        trigger.setJobDetail(job);
-
-        int frequencyInSec = 10;
-
-        trigger.setRepeatInterval(frequencyInSec * 1000);
-        trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
-        trigger.setName("Qrtz_Trigger");
-        return trigger;
-    }
+//    @Bean
+//    public SimpleTriggerFactoryBean trigger(JobDetail job) {
+//
+//        SimpleTriggerFactoryBean trigger = new SimpleTriggerFactoryBean();
+//        trigger.setJobDetail(job);
+//
+//        int frequencyInSec = 10;
+//
+//        trigger.setRepeatInterval(frequencyInSec * 1000);
+//        trigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
+//        trigger.setName("Qrtz_Trigger");
+//        return trigger;
+//    }
 
     @Bean
     @QuartzDataSource

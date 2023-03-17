@@ -5,6 +5,7 @@ import com.gavrilov.plants.model.TechnologicalMap;
 import com.gavrilov.plants.model.dto.TechnologicalMapDto;
 
 import java.util.List;
+import java.util.Map;
 
 public interface TechnologicalMapService {
 
@@ -13,4 +14,6 @@ public interface TechnologicalMapService {
     TechnologicalMap save(TechnologicalMapDto map, Plant plant);
 
     TechnologicalMap findById(Long id);
+
+    Map<String, Float> getTempAndHumid(TechnologicalMap map);
 }

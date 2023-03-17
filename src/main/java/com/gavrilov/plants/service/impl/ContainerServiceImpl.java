@@ -1,10 +1,12 @@
 package com.gavrilov.plants.service.impl;
 
 import com.gavrilov.plants.model.Container;
+import com.gavrilov.plants.model.Device;
 import com.gavrilov.plants.model.PlantUser;
 import com.gavrilov.plants.model.Site;
 import com.gavrilov.plants.model.dto.ContainerDto;
 import com.gavrilov.plants.repository.ContainerRepository;
+import com.gavrilov.plants.repository.DeviceRepository;
 import com.gavrilov.plants.service.ContainerService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,9 @@ public class ContainerServiceImpl implements ContainerService {
     @Autowired
     private ContainerRepository containerRepository;
 
+    @Autowired
+    private DeviceRepository deviceRepository;
+
     @Override
     @Transactional
     public List<Container> findContainersBySite(Site site) {
@@ -32,7 +37,12 @@ public class ContainerServiceImpl implements ContainerService {
         containerDB.setDescription(container.getDescription());
         containerDB.setTitle(container.getTitle());
         containerDB.setSite(user.getSite());
-        return containerRepository.save(containerDB);
+        Device device = deviceRepository.findByDeviceId(container.getDeviceId());
+        containerDB.setDevice(device);
+        Container fromDb = containerRepository.save(containerDB);
+        device.setContainer(fromDb);
+        deviceRepository.save(device);
+        return fromDb;
     }
 
     @Override

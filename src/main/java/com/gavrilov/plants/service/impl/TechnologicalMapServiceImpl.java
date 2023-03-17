@@ -8,7 +8,9 @@ import com.gavrilov.plants.service.TechnologicalMapService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TechnologicalMapServiceImpl implements TechnologicalMapService {
@@ -30,11 +32,22 @@ public class TechnologicalMapServiceImpl implements TechnologicalMapService {
         newMap.setHumidityMax(String.valueOf(map.getHumidityMax()));
         newMap.setHumidityMin(String.valueOf(map.getHumidityMin()));
         newMap.setPlant(plant);
+        newMap.setGrowthPeriod(map.getGrowthPeriod().toString());
         return repository.save(newMap);
     }
 
     @Override
     public TechnologicalMap findById(Long id) {
         return repository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Map<String, Float> getTempAndHumid(TechnologicalMap map) {
+        Map<String, Float> data = new HashMap<>();
+        data.put("minTemp", Float.valueOf(map.getTemperatureMin()));
+        data.put("maxTemp", Float.valueOf(map.getTemperatureMax()));
+        data.put("minHumid", Float.valueOf(map.getHumidityMin()));
+        data.put("maxHumid", Float.valueOf(map.getHumidityMax()));
+        return data;
     }
 }

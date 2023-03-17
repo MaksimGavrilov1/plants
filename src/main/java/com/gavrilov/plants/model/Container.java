@@ -27,6 +27,11 @@ public class Container {
     @JsonBackReference
     private Site site;
 
+    @OneToOne(mappedBy = "container")
+
+    @JsonBackReference
+    private Device device;
+
     @OneToMany(mappedBy="container")
     @JsonManagedReference
     private Set<HydroponicSetup> setups;

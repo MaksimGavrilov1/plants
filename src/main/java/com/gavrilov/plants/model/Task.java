@@ -1,5 +1,6 @@
 package com.gavrilov.plants.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.gavrilov.plants.model.enums.Role;
 import com.gavrilov.plants.model.enums.TaskStatus;
 import jakarta.persistence.*;
@@ -26,6 +27,11 @@ public class Task {
 
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
+
+    @ManyToOne
+    @JoinColumn(name="site_id", nullable=false)
+    @JsonBackReference
+    private Site site;
 
     public Long getId() {
         return id;
