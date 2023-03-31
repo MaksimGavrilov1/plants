@@ -207,7 +207,8 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
                 .setJobData(dataMapHarvest)
                 .build();
         Date date = new Date();
-        date.setTime(new Date().getTime() + 1000L * 60 * 60 * 24 * growthPeriod);
+        date.setTime(new Date().getTime() + 1000);
+//        date.setTime(new Date().getTime() + 1000L * 60 * 60 * 24 * growthPeriod);
         Trigger harvestTrigger = newTrigger()
                 .forJob(harvestJob)
                 .withIdentity(TriggerKey.triggerKey(harvestTaskId.toString()))

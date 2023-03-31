@@ -2,12 +2,14 @@ package com.gavrilov.plants.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gavrilov.plants.model.Container;
 import com.gavrilov.plants.model.Device;
 import com.gavrilov.plants.model.PlantUser;
 import com.gavrilov.plants.model.SensorData;
 import com.gavrilov.plants.model.dto.DeviceDto;
 import com.gavrilov.plants.model.dto.DeviceDtoRender;
 import com.gavrilov.plants.repository.SensorDataRepository;
+import com.gavrilov.plants.service.ContainerService;
 import com.gavrilov.plants.service.DeviceService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,22 +27,28 @@ public class DeviceController {
 
     @Autowired
     private SensorDataRepository sensorDataRepository;
+
+    @Autowired
+    private ContainerService containerService;
     @Autowired
     private DeviceService deviceService;
 
 
-    private final ObjectMapper parser = new ObjectMapper();
+    public static final ObjectMapper parser = new ObjectMapper();
 
-    @GetMapping("/data")
-    public String getData() {
-        PlantUser usr = new PlantUser();
-        List<SensorData> data = sensorDataRepository.findAll();
-        try {
-            return parser.writeValueAsString(data);
-        } catch (JsonProcessingException e) {
-            System.err.println("Unable to parse " + e.getMessage());
+    @GetMapping("/device/data/{containerId}")
+    public ResponseEntity<String> getData(@AuthenticationPrincipal PlantUser user, @PathVariable Long containerId) throws JsonProcessingException {
+        Container container = containerService.getContainerById(containerId);
+        if (container != null) {
+            if (user.getSite().equals(container.getSite())) {
+                List<SensorData> data = sensorDataRepository.findByDeviceIdOrderByTimeAsc(container.getDevice().getDeviceId());
+                return ResponseEntity.ok(parser.writeValueAsString(data));
+            } else {
+                return ResponseEntity.status(403).body("No access to this object");
+            }
+        } else {
+            return ResponseEntity.status(404).body("Container not found");
         }
-        return "";
     }
 
     @GetMapping("/device/ids")

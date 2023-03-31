@@ -60,29 +60,45 @@ public class JobServiceImpl implements JobService {
         //get title to insert violation info
         StringBuilder sb = new StringBuilder(controlTask.getTitle().length() + 100);
         sb.append(controlTask.getTitle());
-        sb.append(" \nVIOLATIONS: ");
+        if (!sb.toString().contains("VIOLATIONS")) {
+            sb.append(" \nVIOLATIONS:\n ");
+        }
+
         boolean violated = false;
 
-        if (!controlTask.getStatus().equals(TaskStatus.CONTROL_WARNING)) {
-            if (neededData.get("minTemp") > actualData.getTemperature()) {
-                sb.append("LOW TEMPERATURE\n");
-                violated = true;
-            } else if (neededData.get("maxTemp") < actualData.getTemperature()) {
-                sb.append("HIGH TEMPERATURE\n");
-                violated = true;
-            }
-            if (neededData.get("minHumid") > actualData.getHumidity()) {
-                sb.append("LOW HUMIDITY\n");
-                violated = true;
-            } else if (neededData.get("maxHumid") < actualData.getHumidity()) {
-                sb.append("HIGH HUMIDITY\n");
-                violated = true;
-            }
-            if (violated) {
-                controlTask.setStatus(TaskStatus.CONTROL_WARNING);
-                controlTask.setTitle(sb.toString());
+
+        if (neededData.get("minTemp") > actualData.getTemperature()) {
+            sb.append("LOW TEMPERATURE\n");
+            violated = true;
+        } else if (neededData.get("maxTemp") < actualData.getTemperature()) {
+            sb.append("HIGH TEMPERATURE\n");
+            violated = true;
+        }
+        if (neededData.get("minHumid") > actualData.getHumidity()) {
+            sb.append("LOW HUMIDITY\n");
+            violated = true;
+        } else if (neededData.get("maxHumid") < actualData.getHumidity()) {
+            sb.append("HIGH HUMIDITY\n");
+            violated = true;
+        }
+        if (violated) {
+
+            controlTask.setStatus(TaskStatus.CONTROL_WARNING);
+            controlTask.setTitle(sb.toString());
+            taskRepository.save(controlTask);
+        } else {
+
+            if (controlTask.getStatus().equals(TaskStatus.CONTROL_WARNING)) {
+                controlTask.setStatus(TaskStatus.IN_PROGRESS);
+                controlTask.setTitle(deleteValidations(sb));
                 taskRepository.save(controlTask);
             }
         }
+
+    }
+
+    private String deleteValidations(StringBuilder sb) {
+        sb.delete(sb.indexOf(" \nVIOLATIONS:\n "), sb.length());
+        return sb.toString();
     }
 }
