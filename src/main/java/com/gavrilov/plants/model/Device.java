@@ -10,6 +10,7 @@ import lombok.Setter;
 import java.util.Objects;
 
 @Entity
+@Table(name = "device")
 @Getter
 @Setter
 public class Device {
@@ -27,11 +28,11 @@ public class Device {
     private String devicePassword;
     @ManyToOne
     @JoinColumn(name = "plant_user_id")
+    @JsonBackReference
     private PlantUser owner;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "container_id", referencedColumnName = "id")
-    @JsonManagedReference
+    @OneToOne(mappedBy = "device")
+    @JsonBackReference
     private Container container;
 
     @ManyToOne

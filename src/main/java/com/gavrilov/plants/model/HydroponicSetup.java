@@ -20,12 +20,12 @@ public class HydroponicSetup {
     private Long id;
     private String address;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="container_id", nullable=false)
     @JsonBackReference
     private Container container;
 
-    @OneToMany(mappedBy="setup")
+    @OneToMany(mappedBy="setup", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<PlantHistory> historyRecords;
 

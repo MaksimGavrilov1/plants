@@ -26,7 +26,15 @@ public class PlantHistory {
     @JsonBackReference
     private HydroponicSetup setup;
 
+    private String setupTitle;
+    private String containerTitle;
     private String harvestId;
+    private String plantTitle;
+    private String techMapTitle;
+    private Long cellId;
+    private Long containerId;
+    private Long mapId;
+
     @ManyToOne
     @JoinColumn(name="setup_cell_id")
     @JsonBackReference

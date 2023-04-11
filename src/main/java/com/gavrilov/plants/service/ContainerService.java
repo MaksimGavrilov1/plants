@@ -15,4 +15,6 @@ public interface ContainerService {
     public Container createContainer(ContainerDto containerDto, PlantUser user);
 
     Container getContainerById(Long id) throws NoSuchElementException;
+
+    List<ContainerDto> convertContainers(List<Container> containers);
 }

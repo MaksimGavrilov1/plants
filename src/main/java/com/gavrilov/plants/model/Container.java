@@ -27,9 +27,10 @@ public class Container {
     @JsonBackReference
     private Site site;
 
-    @OneToOne(mappedBy = "container")
 
-    @JsonBackReference
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "device_id", referencedColumnName = "id")
+    @JsonManagedReference
     private Device device;
 
     @OneToMany(mappedBy="container")

@@ -10,4 +10,5 @@ public class ContainerDto {
     private String title;
     private String description;
     private String deviceId;
+    private Long id;
 }

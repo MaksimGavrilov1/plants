@@ -21,7 +21,8 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public List<String> getDevicesId(PlantUser user) {
         List<Device> devices = deviceRepository.findByOwner(user);
-        List<String> ids = devices.stream().map(Device::getDeviceId).toList();
+        //check device is not already taken
+        List<String> ids = devices.stream().filter(x->x.getContainer() == null).map(Device::getDeviceId).toList();
         return ids;
     }
 

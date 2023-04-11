@@ -42,7 +42,7 @@ public class ContainerController {
         List<Container> containers = containerService.findContainersBySite(user.getSite());
         if (containers != null) {
             try {
-                return ResponseEntity.ok(parser.writeValueAsString(containers));
+                return ResponseEntity.ok(parser.writeValueAsString(containerService.convertContainers(containers)));
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Unable to parse containers list", e);
             }
@@ -62,6 +62,7 @@ public class ContainerController {
     public ResponseEntity<String> getContainer(@AuthenticationPrincipal PlantUser user, @PathVariable(name = "id") Long containerId){
             try {
                 Container container = containerService.getContainerById(containerId);
+                System.out.println(container);
                 if (container.getSite().equals(user.getSite())) {
                     return ResponseEntity.ok(parser.writeValueAsString(container));
                 } else {

@@ -139,6 +139,14 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
                     if (cell.getPlant() == null) {
 
                         //fill data for history
+                        historyRecord.setContainerTitle(setup.getContainer().getTitle());
+                        historyRecord.setSetupTitle(setup.getAddress());
+                        historyRecord.setPlantTitle(plant.getTitle());
+                        historyRecord.setTechMapTitle(map.getTitle());
+                        historyRecord.setDateOfPlant(dateOfPlant);
+                        historyRecord.setHarvestId(uuid.toString());
+                        historyRecord.setSite(plant.getSite());
+
                         historyRecord.setSetup(setup);
                         historyRecord.setPlant(plant);
                         historyRecord.setMap(map);
@@ -151,20 +159,21 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
                         cell.setMap(map);
                         SetupCell fromDb = cellRepository.save(cell);
                         historyRecord.setCell(fromDb);
+                        historyRecord.setCellId(fromDb.getId());
                         historyRepository.save(historyRecord);
 
 
 
                     }
-                    //create tasks
-                    Map<String, Long> taskIds = createTasks(uuid.toString());
+                }
+                //create tasks
+                Map<String, Long> taskIds = createTasks(uuid.toString());
 
-                    //schedule job
-                    try {
-                        scheduleJobs(taskIds.get("controlId"), taskIds.get("harvestId"), uuid.toString(), Integer.valueOf(map.getGrowthPeriod()));
-                    } catch (SchedulerException e) {
-                        System.err.println("Unable to schedule jobs " + e.getMessage());
-                    }
+                //schedule job
+                try {
+                    scheduleJobs(taskIds.get("controlId"), taskIds.get("harvestId"), uuid.toString(), Integer.valueOf(map.getGrowthPeriod()));
+                } catch (SchedulerException e) {
+                    System.err.println("Unable to schedule jobs " + e.getMessage());
                 }
                 return setup;
             } else {
@@ -234,11 +243,14 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
         harvestTask.setSite(example.getSite());
         harvestTask.setHarvestUUID(harvestId);
         harvestTask.setTitle("Harvest %s Planted: %s".formatted(example.getPlant().getTitle(), example.getDateOfPlant()));
+
+        //harvestTask.setTitle("Harvest %s Planted: %s".formatted(example.getPlantTitle(), example.getDateOfPlant()));
         harvestTask.setStatus(TaskStatus.IN_PROGRESS);
         Task controlTask = new Task();
         controlTask.setSite(example.getSite());
         controlTask.setHarvestUUID(harvestId);
         controlTask.setTitle("Control temperature and humidity levels for plant: %s; Planted: %s".formatted(example.getPlant().getTitle(), example.getDateOfPlant()));
+        //controlTask.setTitle("Control temperature and humidity levels for plant: %s; Planted: %s".formatted(example.getPlantTitle(), example.getDateOfPlant()));
         controlTask.setStatus(TaskStatus.IN_PROGRESS);
         res.put("harvestId", taskRepository.save(harvestTask).getId());
         res.put("controlId", taskRepository.save(controlTask).getId());

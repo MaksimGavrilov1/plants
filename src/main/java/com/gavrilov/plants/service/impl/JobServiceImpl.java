@@ -53,6 +53,9 @@ public class JobServiceImpl implements JobService {
             return;
         }
         String deviceId = deviceRepository.findByContainer(example.getSetup().getContainer()).getDeviceId();
+
+        //String deviceId = deviceRepository.findByContainer_Id(example.getContainerId()).getDeviceId();
+
         //get actual info
         SensorData actualData = sensorDataRepository.findByDeviceIdAndStatus(deviceId, SensorDataStatus.CONSTANT);
         //get info from tech map

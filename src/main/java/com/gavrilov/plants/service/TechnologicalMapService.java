@@ -16,4 +16,6 @@ public interface TechnologicalMapService {
     TechnologicalMap findById(Long id);
 
     Map<String, Float> getTempAndHumid(TechnologicalMap map);
+
+    //Map<String, Float> getTempAndHumid(Long id);
 }

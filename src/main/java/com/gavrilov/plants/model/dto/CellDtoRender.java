@@ -10,4 +10,5 @@ public class CellDtoRender {
     private String plantTitle;
     private Integer level;
     private String techMapTitle;
+    private String dateOfPlant;
 }

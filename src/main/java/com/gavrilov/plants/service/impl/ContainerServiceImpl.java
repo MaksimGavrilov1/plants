@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -48,5 +49,20 @@ public class ContainerServiceImpl implements ContainerService {
     @Override
     public Container getContainerById(Long id) throws NoSuchElementException {
         return containerRepository.findById(id).orElseThrow();
+    }
+
+    @Override
+    public List<ContainerDto> convertContainers(List<Container> containers) {
+        List<ContainerDto> result = new ArrayList<>();
+        for (Container container:
+             containers) {
+            ContainerDto dtoObj = new ContainerDto();
+            dtoObj.setTitle(container.getTitle());
+            dtoObj.setDescription(container.getDescription());
+            dtoObj.setDeviceId(container.getDevice().getDeviceId());
+            dtoObj.setId(container.getId());
+            result.add(dtoObj);
+        }
+        return result;
     }
 }

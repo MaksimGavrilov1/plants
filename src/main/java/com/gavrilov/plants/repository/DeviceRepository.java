@@ -13,6 +13,10 @@ import java.util.List;
 @Repository
 public interface DeviceRepository extends JpaRepository<Device, Long> {
     Device findByContainer(Container container);
+
+    Device findByContainer_Id(Long id);
+
+
     Device findByDeviceId(String deviceId);
 
     List<Device> findByOwner(PlantUser owner);

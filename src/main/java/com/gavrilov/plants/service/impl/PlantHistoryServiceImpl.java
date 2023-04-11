@@ -43,6 +43,9 @@ public class PlantHistoryServiceImpl implements PlantHistoryService {
             newRow.setPlantTitle(example.getPlant().getTitle());
             newRow.setDateOfPlant(example.getDateOfPlant());
             newRow.setCellsIds(historyRows.stream().filter(x -> x.getHarvestId().equals(example.getHarvestId())).map(x -> x.getCell().getId()).toList());
+
+            //newRow.setCellsIds(historyRows.stream().filter(x -> x.getHarvestId().equals(example.getHarvestId())).map(PlantHistory::getCellId).toList());
+
             result.add(newRow);
         }
         return result;
