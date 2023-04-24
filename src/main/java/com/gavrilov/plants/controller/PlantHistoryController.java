@@ -32,8 +32,6 @@ public class PlantHistoryController {
 
     @GetMapping("/history/all")
     private ResponseEntity<String> getAllHistory(@AuthenticationPrincipal PlantUser user) throws JsonProcessingException {
-        System.out.println(user.getSite());
-        System.out.println(parser.writeValueAsString(1));
 
         List<PlantHistoryRenderDto> result = plantHistoryService.findBySiteAndConvertToRender(user.getSite());
         if (result != null) {

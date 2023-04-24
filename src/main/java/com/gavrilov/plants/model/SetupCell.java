@@ -35,9 +35,7 @@ public class SetupCell {
     @JsonBackReference
     private TechnologicalMap map;
 
-    @OneToMany(mappedBy="cell")
-    @JsonManagedReference
-    private List<PlantHistory> historyRows;
+
 
 
     public Long getId() {

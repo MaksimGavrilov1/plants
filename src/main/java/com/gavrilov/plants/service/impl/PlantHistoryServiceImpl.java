@@ -36,15 +36,21 @@ public class PlantHistoryServiceImpl implements PlantHistoryService {
         for (PlantHistory example : distinctHarvests) {
             PlantHistoryRenderDto newRow = new PlantHistoryRenderDto();
 
-            newRow.setHarvestUUID(example.getHarvestId());
-            newRow.setContainerTitle(example.getSetup().getContainer().getTitle());
-            newRow.setSetupAddress(example.getSetup().getAddress());
-            newRow.setTechMapTitle(example.getMap().getTitle());
-            newRow.setPlantTitle(example.getPlant().getTitle());
-            newRow.setDateOfPlant(example.getDateOfPlant());
-            newRow.setCellsIds(historyRows.stream().filter(x -> x.getHarvestId().equals(example.getHarvestId())).map(x -> x.getCell().getId()).toList());
+//            newRow.setHarvestUUID(example.getHarvestId());
+//            newRow.setContainerTitle(example.getSetup().getContainer().getTitle());
+//            newRow.setSetupAddress(example.getSetup().getAddress());
+//            newRow.setTechMapTitle(example.getMap().getTitle());
+//            newRow.setPlantTitle(example.getPlant().getTitle());
+//            newRow.setDateOfPlant(example.getDateOfPlant());
+//            newRow.setCellsIds(historyRows.stream().filter(x -> x.getHarvestId().equals(example.getHarvestId())).map(x -> x.getCell().getId()).toList());
 
-            //newRow.setCellsIds(historyRows.stream().filter(x -> x.getHarvestId().equals(example.getHarvestId())).map(PlantHistory::getCellId).toList());
+            newRow.setHarvestUUID(example.getHarvestId());
+            newRow.setContainerTitle(example.getContainerTitle());
+            newRow.setSetupAddress(example.getSetupTitle());
+            newRow.setTechMapTitle(example.getTechMapTitle());
+            newRow.setPlantTitle(example.getPlantTitle());
+            newRow.setDateOfPlant(example.getDateOfPlant());
+            newRow.setCellsIds(historyRows.stream().filter(x -> x.getHarvestId().equals(example.getHarvestId())).map(PlantHistory::getCellId).toList());
 
             result.add(newRow);
         }

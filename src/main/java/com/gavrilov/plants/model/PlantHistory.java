@@ -21,10 +21,7 @@ public class PlantHistory {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name="hydroponic_setup_id")
-    @JsonBackReference
-    private HydroponicSetup setup;
+
 
     private String setupTitle;
     private String containerTitle;
@@ -34,21 +31,6 @@ public class PlantHistory {
     private Long cellId;
     private Long containerId;
     private Long mapId;
-
-    @ManyToOne
-    @JoinColumn(name="setup_cell_id")
-    @JsonBackReference
-    private SetupCell cell;
-
-    @ManyToOne
-    @JoinColumn(name="plant_id")
-    @JsonBackReference
-    private Plant plant;
-
-    @ManyToOne
-    @JoinColumn(name="technological_map_id")
-    @JsonBackReference
-    private TechnologicalMap map;
 
     @ManyToOne
     @JoinColumn(name="site_id", nullable=false)

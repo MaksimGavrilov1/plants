@@ -90,6 +90,11 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
             cell.setPlantTitle(plantTitle);
             cell.setLevel(cellDB.getLevel());
             cell.setTechMapTitle(mapTitle);
+            //date of plant
+            if (plantTitle != null) {
+                cell.setDateOfPlant(historyRepository.findByCellId(cellDB.getId()).getDateOfPlant());
+            }
+            cell.setCellId(cellDB.getId());
             cells.add(cell);
             if (plantTitle != null && !plantsTitles.contains(plantTitle)) {
                 plantsTitles.add(plantTitle);
@@ -147,18 +152,18 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
                         historyRecord.setHarvestId(uuid.toString());
                         historyRecord.setSite(plant.getSite());
 
-                        historyRecord.setSetup(setup);
-                        historyRecord.setPlant(plant);
-                        historyRecord.setMap(map);
-                        historyRecord.setDateOfPlant(dateOfPlant);
-                        historyRecord.setHarvestId(uuid.toString());
-                        historyRecord.setSite(plant.getSite());
+//                        historyRecord.setSetup(setup);
+//                        historyRecord.setPlant(plant);
+//                        historyRecord.setMap(map);
+//                        historyRecord.setDateOfPlant(dateOfPlant);
+//                        historyRecord.setHarvestId(uuid.toString());
+//                        historyRecord.setSite(plant.getSite());
 
 
                         cell.setPlant(plant);
                         cell.setMap(map);
                         SetupCell fromDb = cellRepository.save(cell);
-                        historyRecord.setCell(fromDb);
+//                        historyRecord.setCell(fromDb);
                         historyRecord.setCellId(fromDb.getId());
                         historyRepository.save(historyRecord);
 
@@ -242,15 +247,15 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
         Task harvestTask = new Task();
         harvestTask.setSite(example.getSite());
         harvestTask.setHarvestUUID(harvestId);
-        harvestTask.setTitle("Harvest %s Planted: %s".formatted(example.getPlant().getTitle(), example.getDateOfPlant()));
+        //harvestTask.setTitle("Harvest %s Planted: %s".formatted(example.getPlant().getTitle(), example.getDateOfPlant()));
 
-        //harvestTask.setTitle("Harvest %s Planted: %s".formatted(example.getPlantTitle(), example.getDateOfPlant()));
+        harvestTask.setTitle("Harvest %s Planted: %s".formatted(example.getPlantTitle(), example.getDateOfPlant()));
         harvestTask.setStatus(TaskStatus.IN_PROGRESS);
         Task controlTask = new Task();
         controlTask.setSite(example.getSite());
         controlTask.setHarvestUUID(harvestId);
-        controlTask.setTitle("Control temperature and humidity levels for plant: %s; Planted: %s".formatted(example.getPlant().getTitle(), example.getDateOfPlant()));
-        //controlTask.setTitle("Control temperature and humidity levels for plant: %s; Planted: %s".formatted(example.getPlantTitle(), example.getDateOfPlant()));
+        //controlTask.setTitle("Control temperature and humidity levels for plant: %s; Planted: %s".formatted(example.getPlant().getTitle(), example.getDateOfPlant()));
+        controlTask.setTitle("Control temperature and humidity levels for plant: %s; Planted: %s".formatted(example.getPlantTitle(), example.getDateOfPlant()));
         controlTask.setStatus(TaskStatus.IN_PROGRESS);
         res.put("harvestId", taskRepository.save(harvestTask).getId());
         res.put("controlId", taskRepository.save(controlTask).getId());

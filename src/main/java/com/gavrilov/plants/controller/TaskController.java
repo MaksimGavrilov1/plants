@@ -3,8 +3,11 @@ package com.gavrilov.plants.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gavrilov.plants.model.PlantHistory;
 import com.gavrilov.plants.model.PlantUser;
 import com.gavrilov.plants.model.Task;
+import com.gavrilov.plants.repository.PlantHistoryRepository;
+import com.gavrilov.plants.repository.SetupCellRepository;
 import com.gavrilov.plants.repository.TaskRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -22,6 +26,12 @@ public class TaskController {
 
     @Autowired
     private TaskRepository taskRepository;
+
+    @Autowired
+    private SetupCellRepository cellRepository;
+
+    @Autowired
+    private PlantHistoryRepository historyRepository;
 
     ObjectMapper parser = new ObjectMapper();
 
@@ -37,6 +47,11 @@ public class TaskController {
         if (harvestTask != null) {
             if (harvestTask.getSite().equals(user.getSite())) {
                 taskRepository.deleteByHarvestUUID(harvestTask.getHarvestUUID());
+                List<PlantHistory> histories = historyRepository.findByHarvestId(harvestTask.getHarvestUUID());
+                for (PlantHistory history:
+                     histories) {
+                    cellRepository.updateAfterHarvest(null,null,history.getCellId());
+                }
                 return ResponseEntity.ok("");
             } else {
                 return ResponseEntity.status(403).body("You have no access to this object");

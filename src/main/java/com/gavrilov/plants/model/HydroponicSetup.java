@@ -25,9 +25,7 @@ public class HydroponicSetup {
     @JsonBackReference
     private Container container;
 
-    @OneToMany(mappedBy="setup", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<PlantHistory> historyRecords;
+
 
     @OneToMany(mappedBy="setup", fetch = FetchType.LAZY)
     @JsonManagedReference

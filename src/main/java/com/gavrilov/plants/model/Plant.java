@@ -40,9 +40,7 @@ public class Plant {
     @JsonManagedReference
     private List<TechnologicalMap> maps;
 
-    @OneToMany(mappedBy="plant")
-    @JsonManagedReference
-    private List<PlantHistory> historyRows;
+
 
     @ManyToOne
     @JoinColumn(name="site_id", nullable=false)

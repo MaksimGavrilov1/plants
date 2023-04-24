@@ -52,14 +52,14 @@ public class JobServiceImpl implements JobService {
         if (example == null || controlTask == null) {
             return;
         }
-        String deviceId = deviceRepository.findByContainer(example.getSetup().getContainer()).getDeviceId();
+        //String deviceId = deviceRepository.findByContainer(example.getSetup().getContainer()).getDeviceId();
 
-        //String deviceId = deviceRepository.findByContainer_Id(example.getContainerId()).getDeviceId();
+        String deviceId = deviceRepository.findByContainer_Id(example.getContainerId()).getDeviceId();
 
         //get actual info
         SensorData actualData = sensorDataRepository.findByDeviceIdAndStatus(deviceId, SensorDataStatus.CONSTANT);
         //get info from tech map
-        Map<String, Float> neededData = techMapService.getTempAndHumid(example.getMap());
+        Map<String, Float> neededData = techMapService.getTempAndHumid(techMapService.findById(example.getMapId()));
         //get title to insert violation info
         StringBuilder sb = new StringBuilder(controlTask.getTitle().length() + 100);
         sb.append(controlTask.getTitle());
