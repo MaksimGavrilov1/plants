@@ -8,6 +8,7 @@ import com.gavrilov.plants.model.dto.PlantDto;
 import com.gavrilov.plants.model.dto.PlantDtoRender;
 import com.gavrilov.plants.repository.PlantRepository;
 import com.gavrilov.plants.service.PlantService;
+import com.gavrilov.plants.service.SetupCellService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
@@ -31,6 +32,9 @@ public class PlantsController {
     private final ObjectMapper parser = new ObjectMapper();
     @Autowired
     private PlantRepository plantRepository;
+
+    @Autowired
+    private SetupCellService cellService;
 
     @GetMapping("/plants/all")
     public ResponseEntity<String> getAll(@AuthenticationPrincipal PlantUser user) throws JsonProcessingException {
@@ -80,4 +84,22 @@ public class PlantsController {
             return ResponseEntity.status(HttpStatusCode.valueOf(403)).body("No access");
         }
     }
+
+    @DeleteMapping("/plants/delete/{id}")
+    public ResponseEntity<String> deleteById(@AuthenticationPrincipal PlantUser user, @PathVariable Long id){
+        Plant plant = plantService.findById(id);
+        if (plant.getSite().equals(user.getSite())) {
+            if (cellService.isAbleToDeletePlant(plant)) {
+                plantRepository.delete(plant);
+                return ResponseEntity.ok("true");
+            } else {
+                return ResponseEntity.ok("false");
+            }
+
+        } else {
+            return ResponseEntity.status(403).body("You are not authorized");
+        }
+    }
+
+
 }

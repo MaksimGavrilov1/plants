@@ -43,4 +43,9 @@ public class DeviceServiceImpl implements DeviceService {
         device.setSite(user.getSite());
         return deviceRepository.save(device);
     }
+
+    @Override
+    public boolean isAbleTODelete(Device device) {
+        return device.getContainer() == null;
+    }
 }

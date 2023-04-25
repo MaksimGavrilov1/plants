@@ -17,4 +17,6 @@ public interface ContainerService {
     Container getContainerById(Long id) throws NoSuchElementException;
 
     List<ContainerDto> convertContainers(List<Container> containers);
+
+    boolean isAbleToDelete(Container container);
 }

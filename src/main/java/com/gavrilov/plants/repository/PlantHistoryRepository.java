@@ -14,7 +14,12 @@ public interface PlantHistoryRepository extends JpaRepository<PlantHistory, Long
     List<PlantHistory> findByHarvestId(String harvestId);
 
     @Query("select p from PlantHistory p where p.cellId = ?1")
-    PlantHistory findByCellId(Long cellId);
+    List<PlantHistory> findByCellId(Long cellId);
+
+    @Query("select p from PlantHistory p where p.cellId = ?1 order by p.dateOfPlant DESC")
+    List<PlantHistory> findByCellIdOrderByDateOfPlantDesc(Long cellId);
+
+
 
 
 }

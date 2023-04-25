@@ -65,4 +65,9 @@ public class ContainerServiceImpl implements ContainerService {
         }
         return result;
     }
+
+    @Override
+    public boolean isAbleToDelete(Container container) {
+        return container.getSetups().size() == 0;
+    }
 }

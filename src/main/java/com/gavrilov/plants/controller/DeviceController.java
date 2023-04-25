@@ -8,6 +8,7 @@ import com.gavrilov.plants.model.PlantUser;
 import com.gavrilov.plants.model.SensorData;
 import com.gavrilov.plants.model.dto.DeviceDto;
 import com.gavrilov.plants.model.dto.DeviceDtoRender;
+import com.gavrilov.plants.repository.DeviceRepository;
 import com.gavrilov.plants.repository.SensorDataRepository;
 import com.gavrilov.plants.service.ContainerService;
 import com.gavrilov.plants.service.DeviceService;
@@ -35,6 +36,8 @@ public class DeviceController {
 
 
     public static final ObjectMapper parser = new ObjectMapper();
+    @Autowired
+    private DeviceRepository deviceRepository;
 
     @GetMapping("/device/data/{containerId}")
     public ResponseEntity<String> getData(@AuthenticationPrincipal PlantUser user, @PathVariable Long containerId) throws JsonProcessingException {
@@ -69,6 +72,7 @@ public class DeviceController {
         for (Device device:
              allDevices) {
             DeviceDtoRender temp = new DeviceDtoRender();
+            temp.setId(device.getId());
             temp.setDeviceId(device.getDeviceId());
             temp.setRegistryId(device.getRegistryId());
             temp.setBrokerURL(device.getBrokerURL());
@@ -83,8 +87,33 @@ public class DeviceController {
 
     @PostMapping("/device/add")
     public ResponseEntity<String> addDevice(@RequestBody DeviceDto deviceDto, @AuthenticationPrincipal PlantUser user) {
-        deviceService.save(deviceDto, user);
-        return ResponseEntity.ok("");
+        Device device = deviceRepository.findByDeviceId(deviceDto.getDeviceId());
+        if (device == null) {
+            deviceService.save(deviceDto, user);
+            return ResponseEntity.ok("true");
+        } else {
+            return ResponseEntity.ok("false");
+        }
+
+    }
+
+    @DeleteMapping("/device/delete/{id}")
+    public ResponseEntity<String> deleteDevice(@AuthenticationPrincipal PlantUser user, @PathVariable Long id) {
+        Device device = deviceRepository.findById(id).orElse(null);
+        if (device != null) {
+            if (device.getSite().equals(user.getSite())) {
+                if (deviceService.isAbleTODelete(device)) {
+                    deviceRepository.delete(device);
+                    return ResponseEntity.ok("true");
+                } else {
+                    return ResponseEntity.ok("false");
+                }
+            } else {
+                return ResponseEntity.status(403).body("You are not authorized");
+            }
+        } {
+            return ResponseEntity.status(500).body("Internal Error");
+        }
     }
 }
 

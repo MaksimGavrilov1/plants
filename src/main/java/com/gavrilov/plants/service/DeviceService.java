@@ -14,4 +14,6 @@ public interface DeviceService {
     List<Device> findAllBySite(Site site);
 
     Device save(DeviceDto dto, PlantUser user);
+
+    boolean isAbleTODelete(Device device);
 }

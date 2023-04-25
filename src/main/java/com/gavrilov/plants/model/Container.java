@@ -28,12 +28,16 @@ public class Container {
     private Site site;
 
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name = "device_id", referencedColumnName = "id")
     @JsonManagedReference
     private Device device;
 
-    @OneToMany(mappedBy="container")
+    @OneToMany(mappedBy="container", cascade = CascadeType.ALL)
     @JsonManagedReference
     private Set<HydroponicSetup> setups;
+
+    @OneToMany(mappedBy="container", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private Set<Violation> violations;
 }

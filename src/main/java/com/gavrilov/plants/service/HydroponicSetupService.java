@@ -20,4 +20,6 @@ public interface HydroponicSetupService {
 
     HydroponicSetup plantCulture(PlantSeedDto plantObject, PlantUser user, HydroponicSetup setup);
 
+    boolean isAbleToDelete(HydroponicSetup setup);
+
 }

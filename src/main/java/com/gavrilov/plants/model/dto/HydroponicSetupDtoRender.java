@@ -8,6 +8,7 @@ import java.util.List;
 @Getter
 @Setter
 public class HydroponicSetupDtoRender {
+    private Long setupID;
     private String address;
     private Integer levelsAmount;
     private Integer cellsPerLevel;

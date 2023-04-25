@@ -7,6 +7,7 @@ import com.gavrilov.plants.model.HydroponicSetup;
 import com.gavrilov.plants.model.PlantUser;
 import com.gavrilov.plants.model.dto.HydroponicSetupDto;
 import com.gavrilov.plants.model.dto.PlantSeedDto;
+import com.gavrilov.plants.repository.HydroponicSetupRepository;
 import com.gavrilov.plants.service.ContainerService;
 import com.gavrilov.plants.service.HydroponicSetupService;
 import jakarta.transaction.Transactional;
@@ -27,6 +28,8 @@ public class HydroponicSetupController {
     private HydroponicSetupService setupService;
 
     private final ObjectMapper parser = new ObjectMapper();
+    @Autowired
+    private HydroponicSetupRepository hydroponicSetupRepository;
 
     @GetMapping("/setup/get/byContainer")
     public ResponseEntity<String> getSetupsByContainer(@AuthenticationPrincipal PlantUser user, @RequestBody Long id) {
@@ -88,6 +91,21 @@ public class HydroponicSetupController {
             }
         } else {
             return ResponseEntity.status(404).body("Setup not found");
+        }
+    }
+
+    @DeleteMapping("/setup/delete/{id}")
+    public ResponseEntity<String> deleteSetup (@AuthenticationPrincipal PlantUser user, @PathVariable Long id) {
+        HydroponicSetup setup = setupService.findSetup(id);
+        if (setup.getContainer().getSite().equals(user.getSite())) {
+            if (setupService.isAbleToDelete(setup)) {
+                hydroponicSetupRepository.delete(setup);
+                return ResponseEntity.ok("true");
+            } else {
+                return ResponseEntity.ok("false");
+            }
+        } else {
+            return ResponseEntity.status(403).body("You are not authorized to do this");
         }
     }
 }

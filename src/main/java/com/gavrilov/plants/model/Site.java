@@ -31,6 +31,10 @@ public class Site {
 
     @OneToMany(mappedBy="site")
     @JsonManagedReference
+    private Set<Violation> violations;
+
+    @OneToMany(mappedBy="site")
+    @JsonManagedReference
     private Set<Plant> plants;
 
     @OneToMany(mappedBy="site")

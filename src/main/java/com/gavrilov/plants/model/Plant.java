@@ -36,7 +36,7 @@ public class Plant {
     @JsonManagedReference
     private List<SetupCell> plantedInCells;
 
-    @OneToMany(mappedBy="plant")
+    @OneToMany(mappedBy="plant", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<TechnologicalMap> maps;
 

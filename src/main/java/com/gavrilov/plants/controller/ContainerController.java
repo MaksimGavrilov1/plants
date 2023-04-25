@@ -4,10 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gavrilov.plants.async.MqttStarter;
 import com.gavrilov.plants.model.Container;
+import com.gavrilov.plants.model.HydroponicSetup;
 import com.gavrilov.plants.model.PlantUser;
 import com.gavrilov.plants.model.dto.ContainerDto;
+import com.gavrilov.plants.model.dto.ContainerDtoRender;
+import com.gavrilov.plants.model.dto.HydroponicSetupDtoRender;
+import com.gavrilov.plants.repository.ContainerRepository;
 import com.gavrilov.plants.repository.PlantUserRepository;
 import com.gavrilov.plants.service.ContainerService;
+import com.gavrilov.plants.service.HydroponicSetupService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
@@ -36,6 +41,11 @@ public class ContainerController {
     @Autowired
     private MqttStarter starter;
     private final ObjectMapper parser = new ObjectMapper();
+    @Autowired
+    private ContainerRepository containerRepository;
+
+    @Autowired
+    private HydroponicSetupService setupService;
 
     @GetMapping("/container/all")
     public ResponseEntity<String> findAll(@AuthenticationPrincipal PlantUser user) throws JsonProcessingException {
@@ -62,9 +72,18 @@ public class ContainerController {
     public ResponseEntity<String> getContainer(@AuthenticationPrincipal PlantUser user, @PathVariable(name = "id") Long containerId){
             try {
                 Container container = containerService.getContainerById(containerId);
-                System.out.println(container);
+                ContainerDtoRender render = new ContainerDtoRender();
+                render.setTitle(container.getTitle());
+                render.setDescription(container.getDescription());
+                List<HydroponicSetupDtoRender> listRender = new ArrayList<>();
+                for (HydroponicSetup setup:
+                     container.getSetups()) {
+                    HydroponicSetupDtoRender setRender = setupService.convert(setup);
+                    listRender.add(setRender);
+                }
+                render.setSetups(listRender);
                 if (container.getSite().equals(user.getSite())) {
-                    return ResponseEntity.ok(parser.writeValueAsString(container));
+                    return ResponseEntity.ok(parser.writeValueAsString(render));
                 } else {
                     return ResponseEntity.status(403).body("No access to this container");
                 }
@@ -73,5 +92,20 @@ public class ContainerController {
             } catch (JsonProcessingException e) {
                 return ResponseEntity.status(500).body("Problem occurred");
             }
+    }
+
+    @DeleteMapping("/container/delete/{id}")
+    public ResponseEntity<String> deleteContainer (@AuthenticationPrincipal PlantUser user, @PathVariable Long id) {
+        Container container = containerService.getContainerById(id);
+        if (container.getSite().equals(user.getSite())) {
+            if (containerService.isAbleToDelete(container)) {
+                containerRepository.delete(container);
+                return ResponseEntity.ok("true");
+            } else {
+                return ResponseEntity.ok("false");
+            }
+        } else {
+            return ResponseEntity.status(403).body("You are not authorized to do this");
+        }
     }
 }

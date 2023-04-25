@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class DeviceDtoRender {
 
+    private Long id;
     private String deviceId;
     private String registryId;
     private String brokerURL;

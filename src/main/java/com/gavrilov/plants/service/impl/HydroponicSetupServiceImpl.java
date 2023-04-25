@@ -74,6 +74,7 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
     @Override
     public HydroponicSetupDtoRender convert(HydroponicSetup setup) {
         HydroponicSetupDtoRender renderObject = new HydroponicSetupDtoRender();
+        renderObject.setSetupID(setup.getId());
         renderObject.setAddress(setup.getAddress());
         renderObject.setLevelsAmount(getNumberOfLevels(setup));
         renderObject.setCellsPerLevel(getCellsPerLevel(setup));
@@ -92,7 +93,7 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
             cell.setTechMapTitle(mapTitle);
             //date of plant
             if (plantTitle != null) {
-                cell.setDateOfPlant(historyRepository.findByCellId(cellDB.getId()).getDateOfPlant());
+                cell.setDateOfPlant(historyRepository.findByCellIdOrderByDateOfPlantDesc(cellDB.getId()).get(0).getDateOfPlant());
             }
             cell.setCellId(cellDB.getId());
             cells.add(cell);
@@ -148,9 +149,11 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
                         historyRecord.setSetupTitle(setup.getAddress());
                         historyRecord.setPlantTitle(plant.getTitle());
                         historyRecord.setTechMapTitle(map.getTitle());
+                        historyRecord.setMapId(map.getId());
                         historyRecord.setDateOfPlant(dateOfPlant);
                         historyRecord.setHarvestId(uuid.toString());
                         historyRecord.setSite(plant.getSite());
+                        historyRecord.setContainerId(setup.getContainer().getId());
 
 //                        historyRecord.setSetup(setup);
 //                        historyRecord.setPlant(plant);
@@ -187,6 +190,17 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
         } else {
             throw new EntityNotFoundException("Plant not found");
         }
+    }
+
+    @Override
+    public boolean isAbleToDelete(HydroponicSetup setup) {
+        for (SetupCell cell:
+             setup.getLevels()) {
+            if (cell.getPlant() != null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void scheduleJobs(Long controlTaskId, Long harvestTaskId, String harvestId, Integer growthPeriod) throws SchedulerException {

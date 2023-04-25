@@ -3,17 +3,17 @@ package com.gavrilov.plants.service.impl;
 import com.gavrilov.plants.model.PlantHistory;
 import com.gavrilov.plants.model.SensorData;
 import com.gavrilov.plants.model.Task;
+import com.gavrilov.plants.model.Violation;
 import com.gavrilov.plants.model.enums.SensorDataStatus;
 import com.gavrilov.plants.model.enums.TaskStatus;
-import com.gavrilov.plants.repository.DeviceRepository;
-import com.gavrilov.plants.repository.PlantHistoryRepository;
-import com.gavrilov.plants.repository.SensorDataRepository;
-import com.gavrilov.plants.repository.TaskRepository;
+import com.gavrilov.plants.repository.*;
 import com.gavrilov.plants.service.JobService;
 import com.gavrilov.plants.service.TechnologicalMapService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +34,11 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     private DeviceRepository deviceRepository;
+
+    @Autowired
+    private ViolationRepository violationRepository;
+    @Autowired
+    private ContainerRepository containerRepository;
 
     @Override
     public void notifyOnHarvest(String harvestId, Long taskId) {
@@ -61,42 +66,34 @@ public class JobServiceImpl implements JobService {
         //get info from tech map
         Map<String, Float> neededData = techMapService.getTempAndHumid(techMapService.findById(example.getMapId()));
         //get title to insert violation info
-        StringBuilder sb = new StringBuilder(controlTask.getTitle().length() + 100);
-        sb.append(controlTask.getTitle());
-        if (!sb.toString().contains("VIOLATIONS")) {
-            sb.append(" \nVIOLATIONS:\n ");
-        }
-
-        boolean violated = false;
+        StringBuilder sb = new StringBuilder();
+        boolean isViolated = false;
 
 
         if (neededData.get("minTemp") > actualData.getTemperature()) {
-            sb.append("LOW TEMPERATURE\n");
-            violated = true;
+            sb.append("Низкая температура.\n");
+            isViolated = true;
         } else if (neededData.get("maxTemp") < actualData.getTemperature()) {
-            sb.append("HIGH TEMPERATURE\n");
-            violated = true;
+            sb.append("Высокая температура.\n");
+            isViolated = true;
         }
         if (neededData.get("minHumid") > actualData.getHumidity()) {
-            sb.append("LOW HUMIDITY\n");
-            violated = true;
+            sb.append(" Низкая влажность.\n");
+            isViolated = true;
         } else if (neededData.get("maxHumid") < actualData.getHumidity()) {
-            sb.append("HIGH HUMIDITY\n");
-            violated = true;
+            sb.append(" Высокая влажность.\n");
+            isViolated = true;
         }
-        if (violated) {
-
-            controlTask.setStatus(TaskStatus.CONTROL_WARNING);
-            controlTask.setTitle(sb.toString());
-            taskRepository.save(controlTask);
-        } else {
-
-            if (controlTask.getStatus().equals(TaskStatus.CONTROL_WARNING)) {
-                controlTask.setStatus(TaskStatus.IN_PROGRESS);
-                controlTask.setTitle(deleteValidations(sb));
-                taskRepository.save(controlTask);
-            }
+        if (isViolated) {
+            Violation violation = new Violation();
+            violation.setHarvestUUID(harvestId);
+            violation.setSite(controlTask.getSite());
+            violation.setContainer(containerRepository.findById(example.getContainerId()).orElse(null));
+            violation.setTimeOfViolation(new Timestamp(new Date().getTime()));
+            violation.setMessage(sb.toString());
+            violationRepository.save(violation);
         }
+
 
     }
 

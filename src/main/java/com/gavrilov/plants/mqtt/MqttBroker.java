@@ -204,7 +204,7 @@ public class MqttBroker {
         public void StartWithLogin(String broker, String id, String login, String password)
                 throws Exception {
             clientId = id;
-            client = new MqttClient(broker, clientId);
+            client = new MqttClient(broker, clientId, null);
 
             client.setCallback(this);
             MqttConnectOptions connOpts = new MqttConnectOptions();
