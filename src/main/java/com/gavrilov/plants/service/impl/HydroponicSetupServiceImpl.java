@@ -203,6 +203,24 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
         return true;
     }
 
+    @Override
+    public Long findBySite(Site site) {
+        return repository.countByContainer_Site(site);
+    }
+
+    @Override
+    public Integer getBusyIndexBySite(Site site) {
+        List<HydroponicSetup> setups = repository.findByContainer_Site(site);
+        int freeCells = 0;
+        int totalCells = 0;
+        for (HydroponicSetup setup:
+             setups) {
+            totalCells += setup.getLevels().size();
+            freeCells += setup.getLevels().stream().filter(x->x.getPlant() == null).count();
+        }
+        return Math.round((totalCells - freeCells) / (float)totalCells * 100);
+    }
+
     private void scheduleJobs(Long controlTaskId, Long harvestTaskId, String harvestId, Integer growthPeriod) throws SchedulerException {
         JobDataMap dataMapControl = new JobDataMap();
         dataMapControl.putAsString("controlTaskId", controlTaskId);
@@ -263,13 +281,13 @@ public class HydroponicSetupServiceImpl implements HydroponicSetupService {
         harvestTask.setHarvestUUID(harvestId);
         //harvestTask.setTitle("Harvest %s Planted: %s".formatted(example.getPlant().getTitle(), example.getDateOfPlant()));
 
-        harvestTask.setTitle("Harvest %s Planted: %s".formatted(example.getPlantTitle(), example.getDateOfPlant()));
+        harvestTask.setTitle("Сбор растения %s; Дата посадки: %s".formatted(example.getPlantTitle(), example.getDateOfPlant()));
         harvestTask.setStatus(TaskStatus.IN_PROGRESS);
         Task controlTask = new Task();
         controlTask.setSite(example.getSite());
         controlTask.setHarvestUUID(harvestId);
         //controlTask.setTitle("Control temperature and humidity levels for plant: %s; Planted: %s".formatted(example.getPlant().getTitle(), example.getDateOfPlant()));
-        controlTask.setTitle("Control temperature and humidity levels for plant: %s; Planted: %s".formatted(example.getPlantTitle(), example.getDateOfPlant()));
+        controlTask.setTitle("Контроль температуры и влажности для растения: %s; Дата посадки: %s".formatted(example.getPlantTitle(), example.getDateOfPlant()));
         controlTask.setStatus(TaskStatus.IN_PROGRESS);
         res.put("harvestId", taskRepository.save(harvestTask).getId());
         res.put("controlId", taskRepository.save(controlTask).getId());

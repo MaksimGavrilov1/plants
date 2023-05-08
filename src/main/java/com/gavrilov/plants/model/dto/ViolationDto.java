@@ -14,4 +14,5 @@ public class ViolationDto {
     private String message;
     private String containerTitle;
     private Timestamp timeOfViolation;
+    private Boolean isChecked;
 }

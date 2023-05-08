@@ -91,6 +91,7 @@ public class JobServiceImpl implements JobService {
             violation.setContainer(containerRepository.findById(example.getContainerId()).orElse(null));
             violation.setTimeOfViolation(new Timestamp(new Date().getTime()));
             violation.setMessage(sb.toString());
+            violation.setIsChecked(false);
             violationRepository.save(violation);
         }
 

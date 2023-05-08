@@ -7,6 +7,7 @@ import com.gavrilov.plants.model.PlantHistory;
 import com.gavrilov.plants.model.PlantUser;
 import com.gavrilov.plants.model.SetupCell;
 import com.gavrilov.plants.model.Task;
+import com.gavrilov.plants.model.enums.TaskStatus;
 import com.gavrilov.plants.repository.PlantHistoryRepository;
 import com.gavrilov.plants.repository.SetupCellRepository;
 import com.gavrilov.plants.repository.TaskRepository;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:4200"})
@@ -40,9 +42,15 @@ public class TaskController {
 
     ObjectMapper parser = new ObjectMapper();
 
+    @GetMapping("/tasks/ready")
+    public ResponseEntity<String> getReadyTasks(@AuthenticationPrincipal PlantUser user) throws JsonProcessingException {
+        Long count = taskRepository.countBySiteAndStatus(user.getSite(), TaskStatus.HARVEST_DONE);
+        return ResponseEntity.ok(parser.writeValueAsString(count));
+    }
     @GetMapping("/tasks/all")
     public ResponseEntity<String> getAllTasks(@AuthenticationPrincipal PlantUser user) throws JsonProcessingException {
         List<Task> tasks = taskRepository.findBySite(user.getSite());
+        tasks = tasks.stream().filter(x-> x.getTitle().contains("Сбор")).collect(Collectors.toList());
         return ResponseEntity.ok(parser.writeValueAsString(tasks));
     }
 

@@ -3,6 +3,7 @@ package com.gavrilov.plants.service;
 import com.gavrilov.plants.model.Container;
 import com.gavrilov.plants.model.HydroponicSetup;
 import com.gavrilov.plants.model.PlantUser;
+import com.gavrilov.plants.model.Site;
 import com.gavrilov.plants.model.dto.HydroponicSetupDto;
 import com.gavrilov.plants.model.dto.HydroponicSetupDtoRender;
 import com.gavrilov.plants.model.dto.PlantSeedDto;
@@ -21,5 +22,9 @@ public interface HydroponicSetupService {
     HydroponicSetup plantCulture(PlantSeedDto plantObject, PlantUser user, HydroponicSetup setup);
 
     boolean isAbleToDelete(HydroponicSetup setup);
+
+    Long findBySite(Site site);
+
+    Integer getBusyIndexBySite(Site site);
 
 }

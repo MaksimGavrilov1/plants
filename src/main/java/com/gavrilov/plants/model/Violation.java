@@ -36,6 +36,7 @@ public class Violation {
     private String harvestUUID;
 
     private Timestamp timeOfViolation;
+    private Boolean isChecked;
 
 
     public Long getId() {
