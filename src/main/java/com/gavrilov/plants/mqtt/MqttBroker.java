@@ -328,28 +328,31 @@ public class MqttBroker {
     }
 
     public void Run(boolean withLogin, Site site) {
-        try {
-            // certs structure:
-            //   /my_registry        Registry directory |currentDir|.
-            //   `- /device          Concrete device cert directory |device|.
-            //   |  `- cert.pem
-            //   |  `- key.pem
-            //   |  `- keystore.p12  device certs pair in java friendly format
-            //   `- cert.pem
-            //   `- key.pem
-            //   `- keystore.p12     registry certs pair in java friendly format
-            List<Device> deviceOnSite = deviceService.findAllBySite(site);
-            System.out.println("SESSIONS: ");
-            sessionList.forEach(System.out::println);
-            boolean isPresented = false;
-            for (Device device:
-                 deviceOnSite) {
-                isPresented = sessionList.stream().filter(x->device.equals(x.getDevice())).findFirst().isPresent();
-                if (!isPresented){
+        List<Device> deviceOnSite = deviceService.findAllBySite(site);
+        System.out.println("SESSIONS: ");
+        sessionList.forEach(System.out::println);
+        boolean isPresented = false;
+        for (Device device:
+                deviceOnSite) {
+            try {
+                // certs structure:
+                //   /my_registry        Registry directory |currentDir|.
+                //   `- /device          Concrete device cert directory |device|.
+                //   |  `- cert.pem
+                //   |  `- key.pem
+                //   |  `- keystore.p12  device certs pair in java friendly format
+                //   `- cert.pem
+                //   `- key.pem
+                //   `- keystore.p12     registry certs pair in java friendly format
+
+                isPresented = sessionList.stream().filter(x -> device.equals(x.getDevice())).findFirst().isPresent();
+                if (!isPresented) {
                     MqttSession newDevice = new MqttSession();
                     String uniqueIdForDevice = MqttAsyncClient.generateClientId() + "device";
+                    System.out.println("UNIQUE CLIENT ID_DEVICE: " + uniqueIdForDevice);
                     String uniqueIdForRegistry = MqttAsyncClient.generateClientId() + "registry";
-                    newDevice.StartWithLogin(device.getBrokerURL(),uniqueIdForDevice , device.getDeviceId(), device.getDevicePassword() );
+                    System.out.println("UNIQUE CLIENT FOR REGISTRY: " + uniqueIdForRegistry);
+                    newDevice.StartWithLogin(device.getBrokerURL(), uniqueIdForDevice, device.getDeviceId(), device.getDevicePassword());
 
                     MqttSession newRegistry = new MqttSession();
                     newRegistry.StartWithLogin(device.getBrokerURL(), uniqueIdForRegistry, device.getRegistryId(), device.getRegistryPassword());
@@ -361,8 +364,6 @@ public class MqttBroker {
                     sessionList.add(newDevice);
                     sessionList.add(newRegistry);
                 }
-            }
-
 
 
 //            String currentDir = System.getProperty("user.dir");
@@ -402,10 +403,11 @@ public class MqttBroker {
 //            registry.Stop();
 //            device.Stop();
 //            return;
-        } catch (MqttException me) {
-            me.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
+            } catch (MqttException me) {
+                me.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }
